@@ -1,0 +1,4 @@
+#Ignore Large Matlab files
+
+/SIMULATIONS/disparity-tuning/matlab.mat
+/SIMULATIONS/disparity-tuning/RDS_SurfTuning2.mat
