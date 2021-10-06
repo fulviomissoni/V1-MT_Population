@@ -41,11 +41,9 @@ ph = repmat(ph_,n_orient,1);  %phase_shift values for each orientation channel
 
 a=0; %OCULAR DOMINANCE
 Ft_choice = 'gabor'; % 'gabor'; 'exp_decay'; 'adelson_bergen'
-% v = [0.4 0.2 -1];   %Preferred velocity
-v  = linspace(-1,1,11)*4;
+v = 0;   %Preferred velocity
+% v  = linspace(-1,1,11)*4;
 % v=1;
-% v  = [+1 +0.6 +0.4 0.3 0.2 0 -0.2 -0.3 -0.4 -0.6 -1];
-% v  = [-1 -0.4 0 0.4 1];;
 % kk = [-3 -1.5  0.5  1.5 3]; %Preferred velocity with Adelson_Bergen
 
 %NORMALIZATION VALUES
@@ -91,25 +89,25 @@ if MID_Test==1
     surf_MID_tun()
 end
 %% monocular motion direction selectivity, population activity
-% stim.type = 'grat'; %or 'plaid'
-% stim.theta = [pi/8:pi/8:pi]; %true orientation
-% stim.vel = [-2:0.2:2];
-% stim.dur = 21; %duration in frame
 
-stim.type = 'grat';
-stim.theta_g = [pi/2-pi/8,pi/2+pi/8]; %true orientation
-stim.truetheta = pi/2; %true orientation
-stim.vpld = [2];
-stim.vgrat = [2,2];
+%Stimulus properties
+stim.type = 'shift_grat';
+% stim.theta_g = [pi/4,pi/4+pi/6]; %true orientation
+stim.theta_g = 0;
+% stim.truetheta = pi/2; %true orientation
+% stim.vpld = [2];
+% stim.vgrat = [2,1];
+% stim.vgrat = stim.vpld.*[cos(stim.truetheta-stim.theta_g(1)), cos(stim.truetheta-stim.theta_g(2))];
+% stim.vgrat = round(stim.vgrat,2,'significant');
+stim.vgrat = 0;
 stim.dur = 27; %duration in frame
 stim.mode = 2;
 if motion_pop==1
-%     neuron = 1; %select display of MT neuron
+    %SIMULATION
     [e,param]= motion_popV1MT(param,stim);
     th=2e-2;
-    %Display Data
-    etmp = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,:,1));
-%     etmp = reshape(etmp,4,n_orient,length(v),length(stim.vpld),length(stim.truetheta));
+    %DISPLAy data
+    etmp = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,:,1,1));
     %THRESHOLDING
     M = max(max(etmp,[],3),[],2);
     M = repmat(M,1,size(etmp,2),size(etmp,3));
@@ -121,17 +119,20 @@ if motion_pop==1
     enormtmp = (etmp+M/2)./M;
     enormtmp(isnan(enormtmp)) = 0;
     enormtmp(isinf(enormtmp)) = 1;
-    if strcmp(stim.type,'grat')&&length(stim.vgrat)==2
-        etmp2 = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,1,2));
-        surf_motion_pop(etmp2,param)
+    if strcmp(stim.type,'grat')&&length(stim.theta_g)==2
+        %If we use two separate grat Threshold also that response
+        etmp2 = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,1,2,2));
+%         surf_motion_pop(etmp2,param)
         M = max(max(etmp2,[],3),[],2);
         M = repmat(M,1,size(etmp2,2),size(etmp2,3));
+        %NORMALIZATION
         etmp_norm = etmp2./M;
         mask=abs(etmp_norm)>th;
         etmp2=etmp2.*mask;
+        %TOTAL RESPONSE
         etmp = etmp + etmp2;
     end
-    surf_motion_pop(etmp,param)
+%     surf_motion_pop(etmp,param)
 %     surf_motion_pop(enormtmp,param)
 %     %Display Data
 %     polarplot_motion_tun()

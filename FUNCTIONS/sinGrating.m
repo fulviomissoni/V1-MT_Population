@@ -43,7 +43,9 @@ end
 %This is the fastest implementation
 [y,x,t] = meshgrid(1:sy,1:sx,t);
 
-theta_stim = (theta-pi/2)-pi/2;
+% theta_stim = (theta-pi/2)-pi/2; %band orientation
+% theta_stim = (theta-pi/2)+pi; %vector orientation
+theta_stim = theta+pi/2;
 % [v,theta_stim] = meshgrid(v,theta_stim);
 % v = v(:); theta_stim = theta_stim(:);
 noisetmp = (rand(sy,sx)*2-1);

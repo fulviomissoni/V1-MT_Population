@@ -48,10 +48,8 @@ end
 end
         
 function II = analytic_express(pl)
-
-    [C1,R1,C1S]=grating_geometry(pl.theta_g(1));
-    [C2,R2,C2S]=grating_geometry(pl.theta_g(2));
-    %% From plaid to grating movements
+    
+% From plaid to grating movements
 %     vtrue = pl.vpld*[cos(pl.truetheta); sin(pl.truetheta)]; %pixels/frame  this is true plaid velocity
 %     m1 = C1*vtrue;   % degs/s  this is grating 1 velocity
 %     m1n = sqrt(sum(m1.^2));
@@ -61,10 +59,12 @@ function II = analytic_express(pl)
 % 
 %     omega1 = 2*pi*m1n; 
 %     omega2 = 2*pi*m2n;
-
     [xx,yy]=meshgrid([-pl.apert_rad:pl.apert_rad],...
                      [-pl.apert_rad:pl.apert_rad]);
     ap_mask = xx.^2+yy.^2>pl.apert_rad.^2;
+
+    [C1,R1,C1S]=grating_geometry(pl.theta_g(1));
+    [C2,R2,C2S]=grating_geometry(pl.theta_g(2));
 
     xxr1 = R1*[xx(:)';yy(:)'];
     xxr2 = R2*[xx(:)';yy(:)'];
@@ -108,8 +108,8 @@ function [pRe,g1_rot,g2_rot]= im_rotate_mode(pl)
     g2 = g2(1:dim,1:dim);
     g2_rot = zeros(dim, dim, pl.dur);
     pRe = zeros(dim,dim,pl.dur);
-    g1_rot(:,:,1) = imrotate(g1,-rad2deg(pl.theta_g(1)),'bicubic','crop');
-    g2_rot(:,:,1) = imrotate(g2,-rad2deg(pl.theta_g(2)),'bicubic','crop');
+    g1_rot(:,:,1) = imrotate(g1,rad2deg(pl.theta_g(1)),'bicubic','crop');
+    g2_rot(:,:,1) = imrotate(g2,rad2deg(pl.theta_g(2)),'bicubic','crop');
     pRe(:,:,1) = reshape((g1_rot(:,:,1).*pl.alpha+(1-pl.alpha).*g2_rot(:,:,1)),dim,dim);
     [xx,yy] = meshgrid(1:dim,1:dim);
     ap_mask = (xx-ceil(dim/2)).^2 + (yy-ceil(dim/2)).^2 > ceil(dim/2)^2;
@@ -122,22 +122,23 @@ function [pRe,g1_rot,g2_rot]= im_rotate_mode(pl)
         if ( floor(pl.vgrat(1)) == pl.vgrat(1) ) && ( floor(pl.vgrat(2)) == pl.vgrat(2) )
             g1 = circshift(g1, pl.vgrat(1), 2);
             g2 = circshift(g2, pl.vgrat(2), 2);
-        else
+         else
             g1tmp = imtranslate(g1,[pl.vgrat(1),0],'bicubic','OutputView','full');
             g2tmp = imtranslate(g2,[pl.vgrat(2),0],'bicubic','OutputView','full');   
-            w = size(g1tmp,2)-size(g1,2);
-            w(2) = size(g2tmp,2)-size(g2,2);
-            g1tmp(:,w(1)) = g1tmp(:,end-w(1));
-            g2tmp(:,w(2)) = g2tmp(:,end-w(2));
-            g1tmp = g1tmp(:,1:end-w(1));
-            g2tmp = g2tmp(:,1:end-w(2));
+            w = (size(g1tmp,2)-size(g1,2));
+            w(2) = (size(g2tmp,2)-size(g2,2));
+            g1tmp(:,1:w(1)) = g1tmp(:,size(g1,2)+1:end);
+            g2tmp(:,1:w(2)) = g2tmp(:,size(g2,2)+1:end);
+            g1tmp(:,size(g1,2)+1:end)=[];
+            g2tmp(:,size(g2,2)+1:end)=[];
 %             g1tmp(g1tmp>0.75)=1; g1tmp(g1tmp<=0.4)=0;
 %             g2tmp(g2tmp>0.75)=1; g2tmp(g2tmp<=0.4)=0;
-            g1 = 1+sign(g1tmp-mean(g1tmp,'all'));        g2 = 1+sign(g2tmp-mean(g2tmp,'all'));
+            g1 = (g1tmp - mean(g1tmp,'all'))/std(g1tmp,0,'all');        g2 = (g2tmp - mean(g2tmp,'all'))/std(g1tmp,0,'all');
+%             g1(g1<=0) = 0; g2(g2<=0) = 0;
 %             g1 = g1tmp; g2 = g2tmp;
         end
-        g1_rot(:,:,j) = imrotate(g1,-rad2deg(pl.theta_g(1)),'bicubic','crop');
-        g2_rot(:,:,j) = imrotate(g2,-rad2deg(pl.theta_g(2)),'bicubic','crop');
+        g1_rot(:,:,j) = imrotate(g1,rad2deg(pl.theta_g(1)),'bicubic','crop');
+        g2_rot(:,:,j) = imrotate(g2,rad2deg(pl.theta_g(2)),'bicubic','crop');
         pRe(:,:,j) = reshape((g1_rot(:,:,j).*pl.alpha+(1-pl.alpha).*g2_rot(:,:,j)),dim,dim);
     end
     pRe(ap_mask) = (max(pl.c)-min(pl.c))/2;
@@ -149,7 +150,7 @@ end
 
 function [C,R,CS]=grating_geometry(theta)
 % Define geometry of plaid movements
-
+theta = -theta;
 % m = C*v
 C = [cos(theta)^2 sin(theta)*cos(theta); ...
       sin(theta)*cos(theta) sin(theta)^2];

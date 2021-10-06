@@ -7,10 +7,11 @@ samples=param.samples;
 k0=param.spatFreq;
 dur = stim.dur;
 if ~isfield(stim,'type')
-    error('Define type of the stimulus!! Two options are: grat or plaid')
+    error('Define type of the stimulus!! Options are: grat, plaid, or RDS')
 end
-fieldNames{1} = 'dur'; fieldNames{2} = 'truetheta'; fieldNames{3} = 'vpld';
-fieldNames{4} = 'vgrat'; fieldNames{5} = 'theta_g';
+fieldNames{1} = 'dur'; 
+% fieldNames{2} = 'truetheta'; fieldNames{3} = 'vpld';
+fieldNames{2} = 'vgrat'; fieldNames{3} = 'theta_g';
 argCheck(stim,fieldNames);
 %% Stimulus definition 
 stimuli = ["plaid","grat","RDS","shift_grat"];
@@ -20,22 +21,29 @@ end
     
 switch stim.type
     case 'grat'
-        II = sinGrating(samples,samples,dur,[0,0],stim.vgrat(1),k0,stim.theta_g);
+        II = sinGrating(samples,samples,dur,[0,0],stim.vgrat,k0,stim.theta_g);
     case 'plaid'
+        if ~isfield(stim,'pl_type')
+            pl_type = 1;
+        else 
+            pl_type = stim.pl_type;
+        end
         %plaid object
-        apert_rad = ceil(samples/2)+2;                 %aperture size      [pixs]
-        truetheta = stim.truetheta;     %true orientation   [rad]
-        vpld = stim.vpld;               %velocity amplitude [pixs/frame]
-        k = [k0,k0];                    %spatial freq       [cycle/pix]
-        vgrat = stim.vgrat;             %gratings vel       [pixs/frame]
-        theta_g = stim.theta_g;         %gratings orient    [rad]
-        alpha = 0.5;                      %Alpha channel for transparency
-        contrast = [0.5,0.5];             %Contrast of two gratings
-        mode = stim.mode;
+        arg.dur = dur;                      %aperture size      [pixs]
+        arg.apert_rad = ceil(samples/2)+2;  %aperture size      [pixs]
+        arg.truetheta = stim.truetheta;     %true orientation   [rad]
+        arg.vpld = stim.vpld;               %velocity amplitude [pixs/frame]
+        arg.k = [k0,k0];                    %spatial freq       [cycle/pix]
+        arg.vgrat = stim.vgrat;             %gratings vel       [pixs/frame]
+        arg.theta_g = stim.theta_g;         %gratings orient    [rad]
+        arg.alpha = 0.5;                    %Alpha channel for transparency
+        arg.contrast = [0.5,0.5];           %Contrast of two gratings
+        arg.mode = stim.mode;               %stimulus implementation algorithm
+        arg.pl_type = pl_type;         %plaid type
         %define plaid object
-        pld = plaid(apert_rad,dur,truetheta,vpld,k,vgrat,theta_g,alpha,contrast);                          
+        pld = plaid(arg);                          
         %generate plaid stimulus
-        II = generate_plaid(pld,[],mode);
+        II = generate_plaid(pld,[],arg.mode);
     case 'RDS'
         %make moving dots
         for i=1:dur
