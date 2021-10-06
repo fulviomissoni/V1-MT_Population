@@ -94,7 +94,7 @@ end
 stim.type = 'shift_grat';
 % stim.theta_g = [pi/4,pi/4+pi/6]; %true orientation
 stim.theta_g = 0;
-% stim.truetheta = pi/2; %true orientation
+% stim.truetheta =  pi/2; %true orientation
 % stim.vpld = [2];
 % stim.vgrat = [2,1];
 % stim.vgrat = stim.vpld.*[cos(stim.truetheta-stim.theta_g(1)), cos(stim.truetheta-stim.theta_g(2))];
