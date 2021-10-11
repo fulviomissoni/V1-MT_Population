@@ -34,7 +34,7 @@ samples = 43;
 
 % ph_ = pi/4:-pi/4:-5/4*pi; %this choice is related to the offset value of phase_shift (pi/2)
 ph_ = pi/2;
-n_orient = 8;
+n_orient = 16;
 ph = repmat(ph_,n_orient,1);  %phase_shift values for each orientation channel 
 %d_pref = []; %11X11 GABOR
 %d_pref = []; %43X43 GABOR

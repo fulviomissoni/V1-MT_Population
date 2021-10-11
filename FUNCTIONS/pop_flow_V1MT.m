@@ -36,14 +36,14 @@ alpha = param.normParam;
 
 
 % COMPUTE GABOR FILTERING (SPATIAL AND TEMPORAL PART)
-% tic
+tic
 if param.nOrient == 8
     [F] = filt_gabor_space2D(II,filter_file,tun_flag);
 end
 if param.nOrient == 16
     [F] = filt_sep_gabor(II,filter_file);
 end
-% toc
+toc
 %if tun == 1 then consider only the cell in the center of the frame
 if tun_flag == 1 
     [sy,sx,dumb] = size(F{1,1});

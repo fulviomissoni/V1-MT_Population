@@ -30,127 +30,126 @@ taps = size(F,2); %numbers of taps of the filter
 
 if ~flag
     n_orient = 8;
-    IF = zeros(nr,nc,n_orient,n_frames,side);
+    IF = zeros(nr,nc,n_orient,n_frames*side);
 end
 if flag
-    IF = zeros(nr,nc,1,n_frames,side);
+    n_orient = 1;
+    IF = zeros(nr,nc,n_orient,n_frames*side);
 end
 
+II = reshape(II,nr,nc,n_frames*side);
 %CONVOLUTION COMPUTING
-%for each sides
-for s_ind=1:side
-    %for each frames
-    for frame=1:n_frames
-        %compute the 2D response
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Horizontal and vertical %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        I=II(:,:,frame,s_ind);
-        % 0 rad
-        F1Y = conv2b(I,F(1,:).',3);
-        even = conv2b(F1Y,F(2,:),3);
-        odd = conv2b(F1Y,F(3,:),3);
-        IF(:,:,1,frame,s_ind) = complex(even,odd);
-        clear even odd F1Y;
-        
-        if ~flag
-            % pi/2 rad
-            F1X = conv2b(I,F(1,:),3);
-            even = conv2b(F1X,F(2,:).',3);
-            odd = conv2b(F1X,F(3,:).',3);
-            IF(:,:,5,frame,s_ind) = complex(even,odd);
-            clear even odd F1X;
+for ind=1:n_frames*side
+    %compute the 2D response
 
-            %%%%%%%%%%%%
-            % Diagonal %
-            %%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Horizontal and vertical %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-            F4Y = conv2b(I,F(4,:).',3);
-            F4YF4X = conv2b(F4Y,F(4,:),3);
-            F4YF5X = conv2b(F4Y,F(5,:),3);
-            clear F4Y
+    I=II(:,:,ind);
+    % 0 rad
+    F1Y = conv2b(I,F(1,:).',3);
+    even = conv2b(F1Y,F(2,:),3);
+    odd = conv2b(F1Y,F(3,:),3);
+    IF(:,:,1,ind) = complex(even,odd);
+    clear even odd F1Y;
 
-            F5Y = conv2b(I,F(5,:).',3);
-            F5YF4X = conv2b(F5Y,F(4,:),3);
-            F5YF5X = conv2b(F5Y,F(5,:),3);
-            clear F5Y;
+    if ~flag
+        % pi/2 rad
+        F1X = conv2b(I,F(1,:),3);
+        even = conv2b(F1X,F(2,:).',3);
+        odd = conv2b(F1X,F(3,:).',3);
+        IF(:,:,5,ind) = complex(even,odd);
+        clear even odd F1X;
 
-            % pi/4
-            even = F4YF4X - F5YF5X;
-            odd = F5YF4X + F4YF5X;
-            IF(:,:,3,frame,s_ind) = complex(even,odd);
+        %%%%%%%%%%%%
+        % Diagonal %
+        %%%%%%%%%%%%
 
-            % 3pi/4
-             even = F4YF4X + F5YF5X;
-             odd = F5YF4X - F4YF5X;
-            IF(:,:,7,frame,s_ind) = complex(even,odd);
+        F4Y = conv2b(I,F(4,:).',3);
+        F4YF4X = conv2b(F4Y,F(4,:),3);
+        F4YF5X = conv2b(F4Y,F(5,:),3);
+        clear F4Y
 
-            clear even odd F4YF4X F4YF5X F5YF4X F5YF5X;
-            %%%%%%%%%%%%%%%%%
-            % 'In-betweens' %
-            %%%%%%%%%%%%%%%%%
+        F5Y = conv2b(I,F(5,:).',3);
+        F5YF4X = conv2b(F5Y,F(4,:),3);
+        F5YF5X = conv2b(F5Y,F(5,:),3);
+        clear F5Y;
 
-            % pi/8
-            F8Y = conv2b(I,F(8,:).',3);
+        % pi/4
+        even = F4YF4X - F5YF5X;
+        odd = F5YF4X + F4YF5X;
+        IF(:,:,3,ind) = complex(even,odd);
 
-            F8YF6X = conv2b(F8Y,F(6,:),3);
-            F8YF7X = conv2b(F8Y,F(7,:),3);
+        % 3pi/4
+        even = F4YF4X + F5YF5X;
+        odd = F5YF4X - F4YF5X;
+        IF(:,:,7,ind) = complex(even,odd);
 
-            clear F8Y;
+        clear even odd F4YF4X F4YF5X F5YF4X F5YF5X;
+        %%%%%%%%%%%%%%%%%
+        % 'In-betweens' %
+        %%%%%%%%%%%%%%%%%
 
-            F9Y = conv2b(I,F(9,:).',3);
-            F9YF6X = conv2b(F9Y,F(6,:),3);
-            F9YF7X = conv2b(F9Y,F(7,:),3);
+        % pi/8
+        F8Y = conv2b(I,F(8,:).',3);
 
-            clear F9Y;
+        F8YF6X = conv2b(F8Y,F(6,:),3);
+        F8YF7X = conv2b(F8Y,F(7,:),3);
 
-            % pi/8
-            even = F8YF6X - F9YF7X;
-            odd = F9YF6X + F8YF7X;
+        clear F8Y;
 
-            IF(:,:,2,frame,s_ind) = complex(even,odd);
+        F9Y = conv2b(I,F(9,:).',3);
+        F9YF6X = conv2b(F9Y,F(6,:),3);
+        F9YF7X = conv2b(F9Y,F(7,:),3);
 
-            % 7pi/8
-            even = F8YF6X + F9YF7X;
-            odd = F9YF6X - F8YF7X;
+        clear F9Y;
 
-            IF(:,:,8,frame,s_ind) = complex(even,odd);
+        % pi/8
+        even = F8YF6X - F9YF7X;
+        odd = F9YF6X + F8YF7X;
 
-            clear even odd F8YF6X F8YF7X F9YF6X F9YF7X;        
+        IF(:,:,2,ind) = complex(even,odd);
 
-            % 3pi/8
-            F6Y = conv2b(I,F(6,:).',3);
+        % 7pi/8
+        even = F8YF6X + F9YF7X;
+        odd = F9YF6X - F8YF7X;
 
-            F6YF8X = conv2b(F6Y,F(8,:),3);
-            F6YF9X = conv2b(F6Y,F(9,:),3);
+        IF(:,:,8,ind) = complex(even,odd);
 
-            clear F6Y;
+        clear even odd F8YF6X F8YF7X F9YF6X F9YF7X;        
 
-            F7Y = conv2b(I,F(7,:).',3);
+        % 3pi/8
+        F6Y = conv2b(I,F(6,:).',3);
 
-            F7YF8X = conv2b(F7Y,F(8,:),3);
-            F7YF9X = conv2b(F7Y,F(9,:),3);
-            clear F7Y;
+        F6YF8X = conv2b(F6Y,F(8,:),3);
+        F6YF9X = conv2b(F6Y,F(9,:),3);
 
-            % 3pi/8
-            even = F6YF8X - F7YF9X;
-            odd = F7YF8X + F6YF9X;
+        clear F6Y;
 
-            IF(:,:,4,frame,s_ind) = complex(even,odd);
+        F7Y = conv2b(I,F(7,:).',3);
 
-            % 5pi/8
-            even = F6YF8X + F7YF9X;
-            odd = F7YF8X - F6YF9X;
+        F7YF8X = conv2b(F7Y,F(8,:),3);
+        F7YF9X = conv2b(F7Y,F(9,:),3);
+        clear F7Y;
 
-            IF(:,:,6,frame,s_ind) = complex(even,odd);
+        % 3pi/8
+        even = F6YF8X - F7YF9X;
+        odd = F7YF8X + F6YF9X;
 
-            clear even odd F6YF8X F6YF9X F7YF8X F7YF9X;
-        end
+        IF(:,:,4,ind) = complex(even,odd);
+
+        % 5pi/8
+        even = F6YF8X + F7YF9X;
+        odd = F7YF8X - F6YF9X;
+
+        IF(:,:,6,ind) = complex(even,odd);
+
+        clear even odd F6YF8X F6YF9X F7YF8X F7YF9X;
     end
 end
-
+IF = reshape(IF,nr,nc,n_orient,n_frames,side);
 %THRESHOLDING
 invalid = (abs(real(IF))<DC_thr) | (abs(imag(IF))<DC_thr);
 IF(invalid) = 0;
