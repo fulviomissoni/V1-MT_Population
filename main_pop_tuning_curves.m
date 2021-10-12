@@ -34,15 +34,15 @@ samples = 43;
 
 % ph_ = pi/4:-pi/4:-5/4*pi; %this choice is related to the offset value of phase_shift (pi/2)
 ph_ = pi/2;
-n_orient = 16;
+n_orient = 8;
 ph = repmat(ph_,n_orient,1);  %phase_shift values for each orientation channel 
 %d_pref = []; %11X11 GABOR
 %d_pref = []; %43X43 GABOR
 
 a=0; %OCULAR DOMINANCE
 Ft_choice = 'gabor'; % 'gabor'; 'exp_decay'; 'adelson_bergen'
-v = 0;   %Preferred velocity
-% v  = linspace(-1,1,11)*4;
+% v = 0;   %Preferred velocity
+v  = linspace(-1,1,11)*4;
 % v=1;
 % kk = [-3 -1.5  0.5  1.5 3]; %Preferred velocity with Adelson_Bergen
 
@@ -91,15 +91,15 @@ end
 %% monocular motion direction selectivity, population activity
 
 %Stimulus properties
-stim.type = 'shift_grat';
-% stim.theta_g = [pi/4,pi/4+pi/6]; %true orientation
-stim.theta_g = 0;
-% stim.truetheta =  pi/2; %true orientation
-% stim.vpld = [2];
+stim.type = 'plaid';
+stim.theta_g = [0,pi]; %true orientation
+% stim.theta_g = 0;
+stim.truetheta =  pi/2; %true orientation
+stim.vpld = [0];
 % stim.vgrat = [2,1];
-% stim.vgrat = stim.vpld.*[cos(stim.truetheta-stim.theta_g(1)), cos(stim.truetheta-stim.theta_g(2))];
-% stim.vgrat = round(stim.vgrat,2,'significant');
-stim.vgrat = 0;
+stim.vgrat = stim.vpld.*[cos(stim.truetheta-stim.theta_g(1)), cos(stim.truetheta-stim.theta_g(2))];
+stim.vgrat = round(stim.vgrat,2,'significant');
+% stim.vgrat = 0;
 stim.dur = 27; %duration in frame
 stim.mode = 2;
 if motion_pop==1
@@ -132,7 +132,7 @@ if motion_pop==1
         %TOTAL RESPONSE
         etmp = etmp + etmp2;
     end
-%     surf_motion_pop(etmp,param)
+    surf_motion_pop(etmp,param)
 %     surf_motion_pop(enormtmp,param)
 %     %Display Data
 %     polarplot_motion_tun()
