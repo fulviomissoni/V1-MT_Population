@@ -79,12 +79,19 @@ function II = analytic_express(pl)
         pR2 = c2*(1+sign(cos(2*pi*pl.k(2)*xxr2(1,:)-(2*pi*pl.vgrat(2)*pl.k(2))*t)));
 
         pRe = reshape((pR1.*pl.alpha+(1-pl.alpha).*pR2),length(xx),length(yy));
+        pRe = imfilter(pRe,fspecial('gaussian',ceil(length(xx)/3)));
         pRe(ap_mask)=0.5;
         i=i+1;
         II(:,:,i) = pRe;
     end
 end
 function [pRe,g1_rot,g2_rot]= im_rotate_mode(pl)
+    warning('This modality of plaid generation has inexact velocity of plaid and gratings. This is due to the algorithm that is not suited for under-pixel movements.')
+    prompt = 'Would you continue? [Y/n]\n';
+    str = input(prompt,'s');
+    if strcmp(str,'n')||strcmp(str,'N')
+        error('The execution is stopped!! Set "mode" property of stim variable to 1')
+    end
 %     omega1 = 2*pi*m1n; 
 %     omega2 = 2*pi*m2n;
 
@@ -99,17 +106,30 @@ function [pRe,g1_rot,g2_rot]= im_rotate_mode(pl)
     dim(2) = nCycle(2)*line_width(2)*2;
     dim = min(dim);
     g1 = repmat([Lmin*ones(dim,line_width(1)) Lmax*ones(dim,line_width(1))],1, nCycle(1));
-    g1 = g1(1:dim,1:dim);
+    g1pad = padarray(g1,line_width*2,'circular','both');
+    tmp = imrotate(g1pad,rad2deg(pl.theta_g(1)),'bicubic','loose');
+    indStart = floor(size(tmp,1)/2-dim/2); indEnd = ceil(size(tmp,1)/2+dim/2);
     g1_rot = zeros(dim, dim, pl.dur);
+    tmp(tmp<0) = 0;         tmp(tmp>1) = 1;
+    g1_rot(:,:,1) = tmp(indStart:indEnd-1,indStart:indEnd-1);
+%     g1 = g1(1:dim,1:dim);
+
     %recompute dim_x
 %     dim_x = nCycle*pixPerCycle;
     Lmin = 0.5-pl.c(2); Lmax=0.5+pl.c(2);    
+%     g2 = repmat([Lmin*ones(dim,line_width(2)) Lmax*ones(dim,line_width(2))],1, nCycle(2));
     g2 = repmat([Lmin*ones(dim,line_width(2)) Lmax*ones(dim,line_width(2))],1, nCycle(2));
-    g2 = g2(1:dim,1:dim);
+    g2pad = padarray(g2,line_width*2,'circular','both');
+%     g2 = g2(1:dim,1:dim);
     g2_rot = zeros(dim, dim, pl.dur);
-    pRe = zeros(dim,dim,pl.dur);
-    g1_rot(:,:,1) = imrotate(g1,rad2deg(pl.theta_g(1)),'bicubic','crop');
-    g2_rot(:,:,1) = imrotate(g2,rad2deg(pl.theta_g(2)),'bicubic','crop');
+    tmp = imrotate(g2pad,rad2deg(pl.theta_g(2)),'bicubic','loose');
+    indStart = floor(size(tmp,1)/2-dim/2); indEnd = ceil(size(tmp,1)/2+dim/2);
+    tmp(tmp<0) = 0;         tmp(tmp>1) = 1;
+    g2_rot(:,:,1) = tmp(indStart:indEnd-1,indStart:indEnd-1);
+    pRe = g1_rot;
+%     g1_rot(:,:,1) = imrotate(g1,rad2deg(pl.theta_g(1)),'bicubic','crop');
+    
+%     g2_rot(:,:,1) = imrotate(g2,rad2deg(pl.theta_g(2)),'bicubic','crop');
     pRe(:,:,1) = reshape((g1_rot(:,:,1).*pl.alpha+(1-pl.alpha).*g2_rot(:,:,1)),dim,dim);
     [xx,yy] = meshgrid(1:dim,1:dim);
     ap_mask = (xx-ceil(dim/2)).^2 + (yy-ceil(dim/2)).^2 > ceil(dim/2)^2;
@@ -123,25 +143,41 @@ function [pRe,g1_rot,g2_rot]= im_rotate_mode(pl)
             g1 = circshift(g1, pl.vgrat(1), 2);
             g2 = circshift(g2, pl.vgrat(2), 2);
          else
-            g1tmp = imtranslate(g1,[pl.vgrat(1),0],'bicubic','OutputView','full');
-            g2tmp = imtranslate(g2,[pl.vgrat(2),0],'bicubic','OutputView','full');   
-            w = (size(g1tmp,2)-size(g1,2));
-            w(2) = (size(g2tmp,2)-size(g2,2));
-            g1tmp(:,1:w(1)) = g1tmp(:,size(g1,2)+1:end);
-            g2tmp(:,1:w(2)) = g2tmp(:,size(g2,2)+1:end);
-            g1tmp(:,size(g1,2)+1:end)=[];
-            g2tmp(:,size(g2,2)+1:end)=[];
+            g1tmp = imtranslate(g1pad,[pl.vgrat(1),0],'bicubic','OutputView','full');
+            g2tmp = imtranslate(g2pad,[pl.vgrat(2),0],'bicubic','OutputView','full');   
+%             w = (size(g1tmp,2)-size(g1,2));
+%             w(2) = (size(g2tmp,2)-size(g2,2));
+            indStart = floor(size(g1tmp,1)/2-dim/2); indEnd = ceil(size(g1tmp,1)/2+dim/2);
+            tmp = g1tmp(indStart:indEnd-1,indStart:indEnd-1); 
+%             g1tmp(:,1:w(1)) = g1tmp(:,size(g1,2)+1:end);
+%             g2tmp(:,1:w(2)) = g2tmp(:,size(g2,2)+1:end);
+%             g1tmp(:,size(g1,2)+1:end)=[];
+%             g2tmp(:,size(g2,2)+1:end)=[];
 %             g1tmp(g1tmp>0.75)=1; g1tmp(g1tmp<=0.4)=0;
 %             g2tmp(g2tmp>0.75)=1; g2tmp(g2tmp<=0.4)=0;
-            g1 = (g1tmp - mean(g1tmp,'all'))/std(g1tmp,0,'all');        g2 = (g2tmp - mean(g2tmp,'all'))/std(g1tmp,0,'all');
+            g1 = tmp;  
+            g1(g1<0) = 0;       g1(g1>1) = 1;
+            indStart = floor(size(g2tmp,1)/2-dim/2); indEnd = ceil(size(g2tmp,1)/2+dim/2);
+            tmp = g2tmp(indStart:indEnd-1,indStart:indEnd-1); 
+            g2 = tmp;
+            g2(g2<0) = 0;       g2(g2>1) = 1;
 %             g1(g1<=0) = 0; g2(g2<=0) = 0;
 %             g1 = g1tmp; g2 = g2tmp;
         end
-        g1_rot(:,:,j) = imrotate(g1,rad2deg(pl.theta_g(1)),'bicubic','crop');
-        g2_rot(:,:,j) = imrotate(g2,rad2deg(pl.theta_g(2)),'bicubic','crop');
+        g1pad = padarray(g1,line_width*2,'circular','both');
+        g2pad = padarray(g2,line_width*2,'circular','both');
+        tmp = imrotate(g1pad,rad2deg(pl.theta_g(1)),'bicubic','crop');
+        indStart = floor(size(tmp,1)/2-dim/2); indEnd = ceil(size(tmp,1)/2+dim/2);
+        tmp(tmp<0) = 0;         tmp(tmp>1) = 1;
+        g1_rot(:,:,j) = tmp(indStart:indEnd-1,indStart:indEnd-1); 
+        
+        tmp = imrotate(g2pad,rad2deg(pl.theta_g(2)),'bicubic','crop');
+        indStart = floor(size(tmp,1)/2-dim/2); indEnd = ceil(size(tmp,1)/2+dim/2);
+        tmp(tmp<0) = 0;         tmp(tmp>1) = 1;
+        g2_rot(:,:,j) = tmp(indStart:indEnd-1,indStart:indEnd-1);
         pRe(:,:,j) = reshape((g1_rot(:,:,j).*pl.alpha+(1-pl.alpha).*g2_rot(:,:,j)),dim,dim);
     end
-    pRe(ap_mask) = (max(pl.c)-min(pl.c))/2;
+    pRe(ap_mask) = 0.5;
 %     if length(speed) > 1
 %         g1_rot(circle_index) = 0;
 %         g2_rot(circle_index) = 0;

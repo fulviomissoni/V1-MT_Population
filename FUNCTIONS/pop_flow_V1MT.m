@@ -148,23 +148,45 @@ if nargin>2
 else
     a1 = 0; a2 = 1;
 end
-%cumsum
-S = zeros(sy*sx*n_frames*n_orient*v,phase_num);
-for i=1:4
-    S = S + C1{i};
-end
-S = S/4;
+% S = zeros(sy*sx*n_frames*phase_num,1);
+%%%%%% SECTION AT WORK!!
+sigma = 1;
+const = 1; %if set to 0 no normalization; if set to 1 normalization is used
 for i = 1:4
-    %for each C1 cell (i-index)
-    tmp = C1{i};
-    for j=1:phase_num
-        %for each disparity channel (j-index)
-%         tmp(:,j) = tmp(:,j)./(a1*S(:,j) + a2);
-        tmp(:,j) = tmp(:,j)./(a1*tmp(:,j) + a2);
-    end
-    tmp(isnan(tmp)) = 0;
-    C1{i} = tmp;
+    C1{i} = reshape(C1{i},sx*sy*n_frames,n_orient,v,phase_num);
+    C1{i} = permute(C1{i},[1,4,2,3]);
+    C1{i} = reshape(C1{i},sx*sy*n_frames*phase_num,n_orient,v);
+    S = sum(C1{i},[2 3]);
+    C1{i} = C1{i}./(sigma + const*S/(n_orient*v));
+    C1{i}(isnan(C1{i})) = 0;
+    C1{i} = reshape(C1{i},sy*sx*n_frames,phase_num,n_orient,v);
+    C1{i} = permute(C1{i},[1,3,4,2]);
 end
+% for i=1:4
+%     tmp = C1{i};
+%     tmp = tmp./(sigma + S/(n_orient*v));
+%     tmp(isnan(tmp)) = 0;
+%     C1{i} = tmp;
+% end
+%%%%%%%
+
+% %cumsum
+% S = zeros(sy*sx*n_frames*n_orient*v,phase_num);
+% for i=1:4
+%     S = S + C1{i};
+% end
+% S = S/4;
+% for i = 1:4
+%     %for each C1 cell (i-index)
+%     tmp = C1{i};
+%     for j=1:phase_num
+%         %for each disparity channel (j-index)
+% %         tmp(:,j) = tmp(:,j)./(a1*S(:,j) + a2);
+%         tmp(:,j) = tmp(:,j)./(a1*tmp(:,j) + a2);
+%     end
+%     tmp(isnan(tmp)) = 0;
+%     C1{i} = tmp;
+% end
 %connection weights
 % copp = 0.6;
 copp = 1;
@@ -188,28 +210,28 @@ EC22(isnan(EC22)) = 0;
 % COMPLEX CELLS - LAYER THREE
 C3 = C21 + C22;
 
-%Normalization of C3-cells
-if nargin>2
-    a1 = varargin{1}(1,2);
-    a2 = varargin{1}(2,2);
-else
-    a1 = 0; a2 = 1;
-end
+% % NORMALIZATION of C3-cells
+% if nargin>2
+%     a1 = varargin{1}(1,2);
+%     a2 = varargin{1}(2,2);
+% else
+%     a1 = 0; a2 = 1;
+% end
 
-%permute to reduce the numbers of nested for and, therefore, the computational time
-C3 = reshape(C3,sy*sx,n_orient,n_frames*v,phase_num);
-C3 = permute(C3,[1 3 2 4]);
-C3 = reshape(C3,sy*sx*n_frames*v,n_orient*phase_num);
-S = zeros(sy*sx*n_frames*v,1);
-for maps=1:n_orient*phase_num
-    S = S + C3(:,maps);
-end
-S = S/(n_orient); 
-for maps=1:n_orient*phase_num
-    C3(:,maps) = C3(:,maps)./(a1*S + a2);
-end
-C3 = reshape(C3,sy,sx,n_frames,v,n_orient,phase_num);
-C3 = permute(C3,[1 2 5 3 4 6]);
+% %permute to reduce the numbers of nested for and, thus, the computational time
+% C3 = reshape(C3,sy*sx,n_orient,n_frames*v,phase_num);
+% C3 = permute(C3,[1 3 2 4]);
+% C3 = reshape(C3,sy*sx*n_frames*v,n_orient*phase_num);
+% S = zeros(sy*sx*n_frames*v,1);
+% for maps=1:n_orient*phase_num
+%     S = S + C3(:,maps);
+% end
+% S = S/(n_orient); 
+% for maps=1:n_orient*phase_num
+%     C3(:,maps) = C3(:,maps)./(a1*S + a2);
+% end
+% C3 = reshape(C3,sy,sx,n_frames,v,n_orient,phase_num);
+% C3 = permute(C3,[1 2 5 3 4 6]);
 
 %%MT LAYER
 

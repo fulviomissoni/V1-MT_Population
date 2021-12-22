@@ -1,6 +1,6 @@
 function [varargout] = motion_popV1MT(param,stim)
 % % % % % % % DEBUG % % % % % % %
-debug = true;
+debug = false;
 
 file_name='mono_motion_pop';
 samples=param.samples;
@@ -37,7 +37,7 @@ switch stim.type
         arg.vgrat = stim.vgrat;             %gratings vel       [pixs/frame]
         arg.theta_g = stim.theta_g;         %gratings orient    [rad]
         arg.alpha = 0.5;                    %Alpha channel for transparency
-        arg.contrast = [0.5,0.5];           %Contrast of two gratings
+        arg.contrast = [0.5,0.5];         %Contrast of two gratings
         arg.mode = stim.mode;               %stimulus implementation algorithm
         arg.pl_type = pl_type;         %plaid type
         %define plaid object
@@ -59,6 +59,18 @@ switch stim.type
            II(i+1) = sinGrating(samples,samples,dur,[i,0],stim.vgrat(1),k0,stim.theta_g);
         end
 end
+if stim.disp == 1
+    prompt = 'Press any number to start visualization of visual stimulus\n';
+    start = input(prompt);
+    if ~isempty(start)
+        for i=1:dur
+            imagesc(squeeze(II{1}(:,:,i)))
+            colorbar
+            pause(0.1)
+        end
+    end
+end
+
 %% motion-in-depth descriptors analysis - tuning curves
 n_vel = length(param.prefVel);
 n_orient = param.nOrient;
