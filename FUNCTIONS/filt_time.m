@@ -67,7 +67,7 @@ for index=1:n_vel
         pe(isinf(pe)) = 1;
         po(isnan(po)) = 0;            
         po(isinf(po)) = 1;
-        pe=pe'; po=po';
+%         pe=pe'; po=po';
 %         figure, plot(pe),hold on,plot(po)
 %         pause
     end
@@ -88,7 +88,7 @@ for index=1:n_vel
         pe(isinf(pe)) = 1;
         po(isnan(po)) = 0;            
         po(isinf(po)) = 1;
-        pe=pe'; po=po';
+%         pe=pe'; po=po';
     end
     if(filtertype==3) %Adelson_Bergen
         %Biologically plausible function (BPFunctions)
@@ -109,20 +109,20 @@ for index=1:n_vel
         pe(isinf(pe)) = 1;
         po(isnan(po)) = 0;            
         po(isinf(po)) = 1;
-        pe=pe'; po=po';
+%         pe=pe'; po=po';
     end
     %convolution
 %     disp('filt_time')
-tic
+% tic
     for maps=1:sy*n_orient*side
 %         parfor j=1:side
-            C(:,:,maps) =  (conv2(squeeze(C_tmp(:,:,maps))',pe,conv_type))';
-            S(:,:,maps) =  (conv2(squeeze(S_tmp(:,:,maps))',pe,conv_type))';
-            Ct(:,:,maps) =  (conv2(squeeze(C_tmp(:,:,maps))',po,conv_type))';
-            St(:,:,maps) =  (conv2(squeeze(S_tmp(:,:,maps))',po,conv_type))';
+            C(:,:,maps) =  (conv2(squeeze(C_tmp(:,:,maps)),pe,conv_type));
+            S(:,:,maps) =  (conv2(squeeze(S_tmp(:,:,maps)),pe,conv_type));
+            Ct(:,:,maps) =  (conv2(squeeze(C_tmp(:,:,maps)),po,conv_type));
+            St(:,:,maps) =  (conv2(squeeze(S_tmp(:,:,maps)),po,conv_type));
 %         end
     end 
-toc
+% toc
     [dumb, c_frames, dumb2]=size(C);
     %resort data
     C = permute(reshape(C,sx,c_frames,sy,n_orient,side),[3 1 4 2 5]);

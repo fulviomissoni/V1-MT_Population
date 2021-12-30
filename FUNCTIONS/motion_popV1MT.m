@@ -9,9 +9,20 @@ dur = stim.dur;
 if ~isfield(stim,'type')
     error('Define type of the stimulus!! Options are: grat, plaid, or RDS')
 end
-fieldNames{1} = 'dur'; 
-% fieldNames{2} = 'truetheta'; fieldNames{3} = 'vpld';
-fieldNames{2} = 'vgrat'; fieldNames{3} = 'theta_g';
+switch stim.type
+    case 'grat'
+        fieldNames{1} = 'dur'; 
+        fieldNames{2} = 'vgrat'; fieldNames{3} = 'theta_g';
+    case 'plaid'
+        fieldNames{1} = 'dur'; 
+        fieldNames{2} = 'vgrat'; fieldNames{3} = 'theta_g';
+    case 'RDS'
+        fieldNames{1} = 'dur'; 
+%         fieldNames{2} = 'vx'; 
+%         fieldNames{3} = 'vy'; 
+%         fieldNames{4} = 'sx'; 
+%         fieldNames{5} = 'sy'; 
+end
 argCheck(stim,fieldNames);
 %% Stimulus definition 
 stimuli = ["plaid","grat","RDS","shift_grat"];
@@ -46,11 +57,13 @@ switch stim.type
         II = generate_plaid(pld,[],arg.mode);
     case 'RDS'
         %make moving dots
-        for i=1:dur
-            if i==1
-                II{1}(:,:,1) = myRDS(stim.vgrat(1),1,1,1,samples,samples);
-            else
-                II{1}(:,:,i) = circshift(II{1}(:,:,i-1),stim.vgrat(1),2);
+        scale = 4;    
+        vx = param.prefVel;
+        vy = param.prefVel;
+        for ix = 1:numel(vx)
+            for iy = 1:numel(vy)
+                II{iy,ix} = moving_RDS_MS(samples,samples,dur,scale,vx(ix), vy(iy));
+%                 II{iy,ix} = II{iy,ix}(60:end-60,60:end-60,:);
             end
         end
     case 'shift_grat'
@@ -77,15 +90,39 @@ n_orient = param.nOrient;
 % [IIv,IIo] = size(II);
 % ph_shift = 0;
 % parameters{3,1} = ph_shift;
-e=zeros(4,size(II{1},1),size(II{1},2),n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2)); 
+%IF several set of images are used, then tuning analysis is done
+if (size(II,1)*size(II,2))>1
+    e=zeros(4,1,1,n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2));
+else
+    e=zeros(4,size(II{1},1),size(II{1},2),n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2));
+end
+% e=zeros(4,size(II{1},1),size(II{1},2),n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2)); 
 TUN = 0;
 % %ocular dominance is 0 or 1 'cause is monocular test
 param.ocDom = 1; %force this value
+disp('start population processing')
 for i=1:size(II,1)
     for j=1:size(II,2)
+        
+        disp([i j])
         %select input
         I = cat(4,zeros(size(II{i,j})),II{i,j});
-        [MT,EC21,EC22,EC1,ES] = pop_flow_V1MT(I,param,TUN);
+
+        if ~debug
+            [MT,EC21,EC22,EC1] = pop_flow_V1MT(I,param,TUN);
+        else
+            [MT,EC21,EC22,EC1,ES] = pop_flow_V1MT(I,param,TUN);
+        end
+        if (size(II,1)*size(II,2))>1
+            MT = squeeze(mean(mean(MT,1),2));
+            EC21 = squeeze(mean(mean(EC21,1),2));
+            EC22 = squeeze(mean(mean(EC22,1),2));
+            EC1{1} = squeeze(mean(mean(EC1{1},1),2));
+            EC1{2} = squeeze(mean(mean(EC1{2},1),2));
+            EC1{3} = squeeze(mean(mean(EC1{3},1),2));
+            EC1{4} = squeeze(mean(mean(EC1{4},1),2));
+        end
+
         if debug
             e(8,:,:,:,:,:,i,j) = ES(1,:,:,:,:,:);
             e(7,:,:,:,:,:,i,j) = ES(2,:,:,:,:,:);

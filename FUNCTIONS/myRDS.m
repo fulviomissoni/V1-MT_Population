@@ -23,17 +23,19 @@ else
     sx = 256;
     sy = 256;
 end
-
-if ~isint(sx)||~isint(sx)
+    
+if ~isint(sx)||~isint(sy)
     error('The size must be an integer value!')
 end
 
 %switch-case
 if flag==1
     %RDS correlated 
-    rng(myseed)
+    if ~isempty(myseed)
+        rng(myseed)
+    end 
 %     L1 = randi([0 1],[sy*2 sx*2])*2-1;
-    L1 = rand([sy*2 sx*2])*2-1;
+    L1 = rand(sy*2, sx*2)*2-1;
     R1 = L1;
     R1 = circshift(R1,dr,1);
     R1 = circshift(R1,dc,2);
@@ -44,13 +46,19 @@ if flag == 2
     %Background 'static' and 'foreground' shifted
     %RDS correlated with central patch shift the central patch and the 
     %external patch are uncorrelated
-    rng(myseed)
-    L1 = randi([0 1],[sy sx])*2-1;
+    if ~isempty(myseed)
+        rng(myseed)
+    end 
+%     L1 = randi([0 1],[sy sx])*2-1;
+    L1 = rand(sy, sx)*2-1;
+
     R1 = L1;
-    
-    myseed2 = myseed/2; %use another seed
-    rng(myseed2)
-    cl = randi([0 1],[sy/2+1 sx/2+1])*2-1;
+    if ~isempty(myseed)
+        myseed2 = myseed/2;
+        rng(myseed2)    %use another seed
+    end    
+    cl = rand(sy/2+1,sx/2+1)*2-1;
+%     cl = randi([0 1],[sy/2+1 sx/2+1])*2-1;
     cr = cl;
     
     st_indx = floor(sx/4);      st_indy = floor(sy/4);      
@@ -60,12 +68,18 @@ if flag == 2
 end
 if flag == 3
     %RDS uncorrelated
-    rng(myseed)
-    L1 = randi([0 1],[sy*2 sx*2])*2-1;
-    
-    myseed2 = myseed/2;
-    rng(myseed2)    %use another seed
-    R1 = randi([0 1],[sy*2 sx*2])*2-1;
+    if ~isempty(myseed)
+        rng(myseed)
+    end 
+% 
+%     L1 = randi([0 1],[sy*2 sx*2])*2-1;
+%     R1 = randi([0 1],[sy*2 sx*2])*2-1;
+    L1 = rand(sy*2,sx*2)*2-1;
+    if ~isempty(myseed)
+        myseed2 = myseed/2;
+        rng(myseed2)    %use another seed
+    end
+    R1 = rand(sy*2,sx*2)*2-1;
     R1 = circshift(R1,dr,1);
     R1 = circshift(R1,dc,2);
     L1 = L1(floor(sy/2):floor(3/2*sy),floor(sx/2):floor(3/2*sx));
