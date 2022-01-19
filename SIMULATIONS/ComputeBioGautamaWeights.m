@@ -102,15 +102,21 @@ ind = 400;
 % ind = 1:8;
 ind_phi = 1:size(CT,4);
 
+% % % % % % VISUALIZATION of data
 figure,
+% % % % % % Population response at certain plaid stimulus (selected with ind)
 plot_pop_response(CT(:,:,ind,ind_phi),dx(ind,ind_phi),dy(ind,ind_phi),param.prefVel)
 figure,
+% % % % % % Desired pop response profile
 plot_pop_response(G(:,:,ind,ind_phi),dx(ind,ind_phi),dy(ind,ind_phi),param.prefVel)
 % figure,
+% % % % % % Pop Response of Higher Neural Level (Weighted with weights obtained with BioGautama on pop of plaids)
 % plot_pop_response(CT2(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
 figure,
+% % % % % % Pop Response of Higher Neural Level (Weighted with imposed weights profile)
 plot_pop_response(CT3(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
 figure,
+% % % % % % Pop Response of Higher Neural Level (Weighted with weights obtained with BioGautama on pop of RDS)
 plot_pop_response(CT4(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
 
 dx = xx.*cos(tt);
@@ -118,9 +124,20 @@ dy = xx.*sin(tt);
 
 ind = 1:8;
 figure,
+%weights obtained with BioGautama on pop of plaids
 plot_pop_response(W(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
 figure,
+%weights imposed with a reasoning on intersection of constraints method
 plot_pop_response(W2(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
 figure,
+%weights BioGautama on pop of RDS
 plot_pop_response(W3(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
 
+%SAVE DATA (WEIGHTS FUNCTION)
+W = reshape(W,sze(1)*sze(2),sze(1)*sze(2));
+W2 = reshape(W2,sze(1)*sze(2),sze(1)*sze(2));
+W3 = reshape(W3,sze(1)*sze(2),sze(1)*sze(2));
+
+save("GautamaWieghts88_Plaid.mat",'W')
+save("TikhonovWieghts88.mat",'W2')
+save("GautamaWieghts88_RDS.mat",'W3')
