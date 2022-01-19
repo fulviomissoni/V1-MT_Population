@@ -1,5 +1,8 @@
-function MID_simulation(param)
+function MID_simulation(param,debug)
 
+if debug
+    error('This method is under revision!!')
+end
 file_name='MID_SurfTuning';
 ok=0;
 if param.samples == 11

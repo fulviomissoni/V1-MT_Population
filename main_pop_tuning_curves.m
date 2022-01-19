@@ -58,115 +58,85 @@ param.tempFilt    = Ft_choice;      %"Ft_Choice";
 param.spatialFilt = filter_file;    %"filter_file";
 param.samples     = samples;        %"samples";
 param.normParam   = alpha;          %"normalization factor";
-%%
-% CHOICES
-RDS_Test = 0;
-MID_Test = 0;
-motion_pop = 1;
-bio_gautama = 0;
-%% RDS-Test
 
-if RDS_Test==1
-    choice = '1D_disp';
-%     choice = '2D_disp';
-    %For the total simulation one day (at least) is necessary
-    RDS_simulation(param,choice)
-    %Display Data
-    switch(choice)
-        case '1D_disp'
-            %Disparity Tuning Curves
-            plot_disp_tun()
-         case '2D_disp'
-            %Disparity Tuning Surfaces 
-            surf_disp_tun()
-    end
-end
-%% MID-Test - Velocity Tuning Surface
-if MID_Test==1
-    MID_simulation(param)
-    %Display Data
-    surf_MID_tun()
-end
 %% monocular motion direction selectivity, population activity
 
-if motion_pop==1
+%STIMULUS DEFINITION
+stim.type = 'RDS_tuning';
+theta_cell = 0:pi/param.nOrient:pi-pi/param.nOrient;        
+[vv,tt] = meshgrid(param.prefVel,theta_cell);
+stim.stim_size = size(vv);
+stim.truetheta = tt(:);
+stim.theta_g = stim.truetheta;
+stim.vel_stim = vv(:); 
+vx = vv.*cos(tt);
+vy = vv.*sin(tt);
+stim.vgrat = [vx(:),vy(:)];
+stim.dur = 72; %duration in frame
+stim.mode = 1;
+stim.disp = 0;
+theta = [3/2*pi-pi/4,3/2*pi+pi/4];
+%     stim = init_stimulus();
+%SIMULATION
+[e,param] = motion_popV1MT(param,stim);
+th = 2e-2;
+%SAVE DATA
+path = 'SIMULATIONS';
+OldFolder = cd;
+cd(path);
+save('myvel_tuning_polarRDS_dur72','e','param','stim','-v7.3')
+cd(OldFolder)
+%BIOGAUTAMA COMPUTING FOR MT PATTERN RESPONSE
+theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
 
-    %STIMULUS DEFINITION
-    stim.type = 'RDS_tuning';
-    theta_cell = 0:pi/param.nOrient:pi-pi/param.nOrient;        
-    [vv,tt] = meshgrid(param.prefVel,theta_cell);
-    stim.stim_size = size(vv);
-    stim.truetheta = tt(:);
-    stim.theta_g = stim.truetheta;
-    stim.vel_stim = vv(:); 
-    vx = vv.*cos(tt);
-    vy = vv.*sin(tt);
-    stim.vgrat = [vx(:),vy(:)];
-    stim.dur = 72; %duration in frame
-    stim.mode = 1;
-    stim.disp = 0;
-    theta = [3/2*pi-pi/4,3/2*pi+pi/4];
-    stim = init_stimulus();
-    %SIMULATION
-    [e,param] = motion_popV1MT(param,stim);
-    th = 2e-2;
-    %SAVE DATA
-    path = 'SIMULATIONS';
-    OldFolder = cd;
-    cd(path);
-    save('myvel_tuning_polarRDS_dur72','e','param','stim','-v7.3')
-    cd(OldFolder)
-    %BIOGAUTAMA COMPUTING FOR MT PATTERN RESPONSE
-    theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
-    
-    [xx,tt] = meshgrid(param.prefVel,theta_cell_OUT);
+[xx,tt] = meshgrid(param.prefVel,theta_cell_OUT);
 
-    %Explicit intersection of constraints method to compute weigths
+%Explicit intersection of constraints method to compute weigths
 %     W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
-   W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
+W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
 %     W2 = (0.5+0.5*cos(2*pi/4*(xx(:).*cos(tt(:)'-tt(:)) - xx(:)')));
 %     W2 = exp(-abs(xx(:).*cos(tt(:)'-tt(:)) - xx(:)')/(0.25)).^2;
-    W2 = W2 - eye(size(W2));
-    
-    [dx] = reshape(stim.vel_stim.*cos(stim.truetheta),8,11);
-    [dy] = reshape(stim.vel_stim.*sin(stim.truetheta),8,11);
-    
-    sgmx = .5;
-    sgmy = .5;
-    
-    G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
-        (xx.*sin(tt)-dy).^2/(2*sgmy^2)));
-    
-    pop_resp = squeeze(e(3,:,:,:,:));
-    sze = size(pop_resp);
+W2 = W2 - eye(size(W2));
+
+[dx] = reshape(stim.vel_stim.*cos(stim.truetheta),8,11);
+[dy] = reshape(stim.vel_stim.*sin(stim.truetheta),8,11);
+
+sgmx = .5;
+sgmy = .5;
+
+G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
+    (xx.*sin(tt)-dy).^2/(2*sgmy^2)));
+
+pop_resp = squeeze(e(3,:,:,:,:));
+sze = size(pop_resp);
 %     %NORMALIZATION
 %     pop_resp = pop_resp./max(pop_resp,[],4);
-    pop_resp_BioGautama = reshape(reshape(pop_resp,sze(1)*sze(2),[])*W,sze);
-    pop_resp_BioGautama2 = reshape((reshape(pop_resp,sze(1)*sze(2),[])*W2'),sze);
+pop_resp_BioGautama = reshape(reshape(pop_resp,sze(1)*sze(2),[])*W,sze);
+pop_resp_BioGautama2 = reshape((reshape(pop_resp,sze(1)*sze(2),[])*W2'),sze);
 %     pop_resp_BioGautama = squeeze(mean(mean(pop_resp_BioGautama(61:end-60,61:end-60,:,:),1),2));
 %     pop_resp_BioGautama2 = squeeze(mean(mean(pop_resp_BioGautama2(:,:,:,:),1),2));
 %     pop_resp = squeeze(mean(mean(pop_resp(:,:,:,:),1),2));
-    %POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
-    figure,plot_pop_response(pop_resp,0,0,param.prefVel)
-    title('POP RESPONSE')
-    figure,plot_pop_response(pop_resp_BioGautama,0,0,param.prefVel)
-    title('POP RESP BIO GAUTAMA')
-    figure,plot_pop_response(pop_resp_BioGautama2,0,0,param.prefVel)
-    title('POP RESP BIO GAUTAMA2')
+%POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
+figure,plot_pop_response(pop_resp,0,0,param.prefVel)
+title('POP RESPONSE')
+figure,plot_pop_response(pop_resp_BioGautama,0,0,param.prefVel)
+title('POP RESP BIO GAUTAMA')
+figure,plot_pop_response(pop_resp_BioGautama2,0,0,param.prefVel)
+title('POP RESP BIO GAUTAMA2')
 %     figure,plot_pop_response(pop_resp_BioGautama2-pop_resp,0,0,param.prefVel)
-    figure,plot_pop_response(G,0,0,param.prefVel)
-    %POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
-    figure,plot_pop_response(pop_resp,vx,vy,param.prefVel)
-    title('POP RESP')
-    figure,plot_pop_response(pop_resp_BioGautama,vx,vy,param.prefVel)
-    title('POP RESP BIO GAUTAMA')
-    figure,plot_pop_response(pop_resp_BioGautama2,vx,vy,param.prefVel)
-    title('POP RESP BIO GAUTAMA2')
-    %     figure,plot_pop_response(pop_resp_BioGautama2-pop_resp,vx,vy,param.prefVel)
+figure,plot_pop_response(G,0,0,param.prefVel)
+%POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
+figure,plot_pop_response(pop_resp,vx,vy,param.prefVel)
+title('POP RESP')
+figure,plot_pop_response(pop_resp_BioGautama,vx,vy,param.prefVel)
+title('POP RESP BIO GAUTAMA')
+figure,plot_pop_response(pop_resp_BioGautama2,vx,vy,param.prefVel)
+title('POP RESP BIO GAUTAMA2')
+%     figure,plot_pop_response(pop_resp_BioGautama2-pop_resp,vx,vy,param.prefVel)
 
-    %SELECT data
+%SELECT data
 %     etmp = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,:,1,1));
-    %THRESHOLDING
+%THRESHOLDING
 %     M = max(max(etmp,[],3),[],2);
 %     M = repmat(M,1,size(etmp,2),size(etmp,3));
 %     etmp_norm = etmp./M;
@@ -177,7 +147,7 @@ if motion_pop==1
 %     enormtmp = (etmp+M/2)./M;
 %     enormtmp(isnan(enormtmp)) = 0;
 %     enormtmp(isinf(enormtmp)) = 1;
-    %BIOGAUTAMA
+%BIOGAUTAMA
 
 %     if strcmp(stim.type,'grat')&&length(stim.theta_g)==2
 %         %If we use two separate grat Threshold also that response

@@ -146,18 +146,16 @@ if nargin>2
     a1 = varargin{1}(1,1);
     a2 = varargin{1}(2,1);
 else
-    a1 = 0; a2 = 1;
+    a1 = 1; a2 = 0;
 end
 % S = zeros(sy*sx*n_frames*phase_num,1);
-%%%%%% SECTION AT WORK!!
-sigma = 1;
-const = 1; %if set to 0 no normalization; if set to 1 normalization is used
+
 for i = 1:4
     C1{i} = reshape(C1{i},sx*sy*n_frames,n_orient,v,phase_num);
     C1{i} = permute(C1{i},[1,4,2,3]);
     C1{i} = reshape(C1{i},sx*sy*n_frames*phase_num,n_orient,v);
     S = sum(C1{i},[2 3]);
-    C1{i} = C1{i}./(sigma + const*S/(n_orient*v));
+    C1{i} = C1{i}./(a1 + a2*S/(n_orient*v));
     C1{i}(isnan(C1{i})) = 0;
     C1{i} = reshape(C1{i},sy*sx*n_frames,phase_num,n_orient,v);
     C1{i} = permute(C1{i},[1,3,4,2]);

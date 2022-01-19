@@ -51,7 +51,7 @@ switch stim.type
         for num_stim = 1:length(stim.truetheta)
                 vx = stim.vgrat(num_stim,1);
                 vy = stim.vgrat(num_stim,2);
-                II{num_stim} = moving_RDS_MS(samples,samples,43,4,vx, vy);
+                II{num_stim} = moving_RDS_MS(samples,samples,dur,4,vx, vy);
                 II{num_stim} = II{num_stim}(60:end-60,60:end-60,:);
         end
         II = reshape(II,stim.stim_size);
@@ -119,19 +119,19 @@ for i=1:size(II,1)
                 sze = size(MT);
                 MT = squeeze(mean(mean(MT(sze(1)/2,sze(2)/2,:,:),1),2));
                 EC21 = squeeze(mean(mean(EC21(sze(1)/2,sze(2)/2,:,:),1),2));
-                EC22 = squeeze(mean(mean(EC22(sze(1)/2,sze(2)/2,:,:),1),2));
+%                 EC22 = squeeze(mean(mean(EC22(sze(1)/2,sze(2)/2,:,:),1),2));
                 EC1{1} = squeeze(mean(mean(EC1{1}(sze(1)/2,sze(2)/2,:,:),1),2));
                 EC1{2} = squeeze(mean(mean(EC1{2}(sze(1)/2,sze(2)/2,:,:),1),2));
-                EC1{3} = squeeze(mean(mean(EC1{3}(sze(1)/2,sze(2)/2,:,:),1),2));
-                EC1{4} = squeeze(mean(mean(EC1{4}(sze(1)/2,sze(2)/2,:,:),1),2));
+%                 EC1{3} = squeeze(mean(mean(EC1{3}(sze(1)/2,sze(2)/2,:,:),1),2));
+%                 EC1{4} = squeeze(mean(mean(EC1{4}(sze(1)/2,sze(2)/2,:,:),1),2));
             else
                 MT = squeeze(mean(mean(MT,1),2));
                 EC21 = squeeze(mean(mean(EC21,1),2));
-                EC22 = squeeze(mean(mean(EC22,1),2));
+%                 EC22 = squeeze(mean(mean(EC22,1),2));
                 EC1{1} = squeeze(mean(mean(EC1{1},1),2));
                 EC1{2} = squeeze(mean(mean(EC1{2},1),2));
-                EC1{3} = squeeze(mean(mean(EC1{3},1),2));
-                EC1{4} = squeeze(mean(mean(EC1{4},1),2));
+%                 EC1{3} = squeeze(mean(mean(EC1{3},1),2));
+%                 EC1{4} = squeeze(mean(mean(EC1{4},1),2));
             end
         end
 
