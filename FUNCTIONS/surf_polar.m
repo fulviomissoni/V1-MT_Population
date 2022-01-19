@@ -16,11 +16,24 @@ end
 [rho theta]=meshgrid(disp,linspace(0,pi,size(I,1)+1));
 
 X=rho.*cos(theta); Y=rho.*sin(theta);
-
-surf(X,Y,[I; fliplr(I(1,:))]); %axis normal
-shading interp
-fvc=surf2patch(0.9*X,0.9*Y,-1+zeros(size(X)));
+[Xout Yout]=meshgrid(linspace(min(disp),max(disp),101));
+[thetaout rhoout] = cart2pol(Xout,Yout);
+thetaout = atan(Yout./Xout);
+thetaout = thetaout + (thetaout<0)*pi;
+thetaout(isnan(thetaout)) = 0;
+rhoout = Xout.*cos(thetaout) + Yout.*sin(thetaout);
+Iout = interp2(rho,theta,[I; fliplr(I(1,:))],rhoout,thetaout);
+imagesc(linspace(min(disp),max(disp),101),linspace(min(disp),max(disp),101),Iout)
+axis xy
+% fvc=surf2patch(X,Y,-1+zeros(size(X)),[I; fliplr(I(1,:))]);
+% 
 % patch(fvc);
+% shading interp; 
+% 
+hold on
+plot(X(:,[1 end])',Y(:,[1 end])','k--')
+plot(X,Y,'k--')
+
 % % xlabel('dx')
 % % ylabel('dy')
 % 
