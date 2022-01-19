@@ -24,5 +24,6 @@ p.theta_g = arg.theta_g;
 p.alpha = arg.alpha;
 p.c = arg.contrast;
 p.pl_type = arg.pl_type;
+p.mode = arg.mode;
 % from structure to class...
 p = class(p,'plaid');

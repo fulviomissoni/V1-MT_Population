@@ -105,17 +105,17 @@ if motion_pop==1
     stim.dur = 72; %duration in frame
     stim.mode = 1;
     stim.disp = 0;
-%     theta = [3/2*pi-pi/4,3/2*pi+pi/4];
-%     stim = init_stimulus();
-%     %SIMULATION
-%     [e,param]= motion_popV1MT(param,stim);
-%     th = 2e-2;
-%     %SAVE DATA
-%     path = 'SIMULATIONS';
-%     OldFolder = cd;
-%     cd(path);
-%     save('vel_tuning_polarRDS_dur72','e','param','stim','-v7.3')
-%     cd(OldFolder)
+    theta = [3/2*pi-pi/4,3/2*pi+pi/4];
+    stim = init_stimulus();
+    %SIMULATION
+    [e,param] = motion_popV1MT(param,stim);
+    th = 2e-2;
+    %SAVE DATA
+    path = 'SIMULATIONS';
+    OldFolder = cd;
+    cd(path);
+    save('myvel_tuning_polarRDS_dur72','e','param','stim','-v7.3')
+    cd(OldFolder)
     %BIOGAUTAMA COMPUTING FOR MT PATTERN RESPONSE
     theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
     
@@ -139,7 +139,8 @@ if motion_pop==1
     
     pop_resp = squeeze(e(3,:,:,:,:));
     sze = size(pop_resp);
-    pop_resp = pop_resp./max(pop_resp,[],4);
+%     %NORMALIZATION
+%     pop_resp = pop_resp./max(pop_resp,[],4);
     pop_resp_BioGautama = reshape(reshape(pop_resp,sze(1)*sze(2),[])*W,sze);
     pop_resp_BioGautama2 = reshape((reshape(pop_resp,sze(1)*sze(2),[])*W2'),sze);
 %     pop_resp_BioGautama = squeeze(mean(mean(pop_resp_BioGautama(61:end-60,61:end-60,:,:),1),2));

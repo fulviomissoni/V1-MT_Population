@@ -31,17 +31,17 @@ switch stim.type
         
         for num_pld = 1:length(stim.truetheta)
             %plaid object
-            arg.dur = dur;                      %aperture size      [pixs]
-            arg.apert_rad = ceil(samples/2)+2;  %aperture size      [pixs]
-            arg.truetheta = stim.truetheta(num_pld);     %true orientation   [rad]
-            arg.vpld = stim.vel_stim(num_pld);               %velocity amplitude [pixs/frame]
-            arg.k = [k0,k0];                    %spatial freq       [cycle/pix]
-            arg.vgrat = stim.vgrat(num_pld,:);             %gratings vel       [pixs/frame]
-            arg.theta_g = stim.theta_g(num_pld,:);         %gratings orient    [rad]
-            arg.alpha = 0.5;                    %Alpha channel for transparency
-            arg.contrast = [0.5,0.5];         %Contrast of two gratings
-            arg.mode = stim.mode;               %stimulus implementation algorithm
-            arg.pl_type = pl_type;         %plaid type
+            arg.dur = dur;                              %aperture size      [pixs]
+            arg.apert_rad = ceil(samples/2)+2;          %aperture size      [pixs]
+            arg.truetheta = stim.truetheta(num_pld);    %true orientation   [rad]
+            arg.vpld = stim.vel_stim(num_pld);          %velocity amplitude [pixs/frame]
+            arg.k = [k0,k0];                            %spatial freq       [cycle/pix]
+            arg.vgrat = stim.vgrat(num_pld,:);          %gratings vel       [pixs/frame]
+            arg.theta_g = stim.theta_g(num_pld,:);      %gratings orient    [rad]
+            arg.alpha = 0.5;                            %alpha channel for transparency
+            arg.contrast = [0.5,0.5];                   %Contrast of two gratings
+            arg.mode = stim.mode;                       %stimulus implementation algorithm
+            arg.pl_type = pl_type;                      %plaid type
             %define plaid object
             II{num_pld} = plaid(arg);
             %generate plaid stimulus

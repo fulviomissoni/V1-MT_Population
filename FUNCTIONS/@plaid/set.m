@@ -21,4 +21,6 @@ switch type
         p.alpha = value;
     case 'c'
         p.c = value;
+    case 'mode'
+        p.mode = mode;
 end

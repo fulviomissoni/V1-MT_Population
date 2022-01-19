@@ -1,35 +1,25 @@
 function II = generate_plaid(pld,varargin)
     if ~size(varargin,1)
         disp = 0;
-        mode = 2;
     else
         if numel(varargin)>1
             if isempty(varargin{1})
                 disp=0;
-                if numel(varargin)==2
-                    mode = varargin{2};
-                end
             else
                 disp = varargin{1};
-                if numel(varargin)==2
-                	mode = varargin{2};
-                elseif numel(varargin)>2
-                    error('The number of the supplement arguments must not greater than 2!!')
-                end
             end
         end
     end
-    II = cell(length(pld.truetheta),1);
 
-    for j=1:length(pld.truetheta)
-        II{j} = simulate(pld,mode);
+    for j=1:size(pld.vgrat,1)
+        II = simulate(pld);
     %         set(gcf,'Name','test','pos',[1 620 200 200])
         if disp
             figure
             set(gcf,'color','k')
             set(gca,'vis','off')
             for i=1:pld.dur 
-                imagesc(II{j}(:,:,i))
+                imagesc(II(:,:,i))
                 view(0,-90)
                 pause(0.05)
             end
@@ -37,9 +27,9 @@ function II = generate_plaid(pld,varargin)
     end
 end
 
-function varargout = simulate(pl,mode)
+function varargout = simulate(pl)
 
-switch(mode)
+switch(pl.mode)
     case 1
         varargout{1} = analytic_express(pl);
     case 2
@@ -186,7 +176,7 @@ end
 
 function [C,R,CS]=grating_geometry(theta)
 % Define geometry of plaid movements
-theta = -theta;
+% theta = -theta;
 % m = C*v
 C = [cos(theta)^2 sin(theta)*cos(theta); ...
       sin(theta)*cos(theta) sin(theta)^2];
