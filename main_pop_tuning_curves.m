@@ -1,9 +1,11 @@
-% clear
+clear
 close all
 clc
 
 addpath FUNCTIONS
 %%  POPULATION INIT
+
+%SPATIAL FILTERS
 
 % % FILTER 11x11
 % filter_file='FILTERS/Gt11B0.0833f0.25.mat';     %Spatial domain - components for 8 orientations of 11x11 Gabor 
@@ -15,40 +17,31 @@ addpath FUNCTIONS
 
 %FILTER 43x43
 filter_file='FILTERS/Gt43B0.0208f0.063.mat';
-% filter_file='FILTERS/Gt47B0.0210f0.063.mat';
-% filter_file='FILTERS/Gt47B0.0270f0.063.mat';
-% filter_file='FILTERS/Gt47B0.0300f0.063.mat';
-% filter_file='FILTERS/Gt47B0.0400f0.063.mat';
 % filter_file='FILTERS/Gt47B0.0800f0.063.mat';
-k0=0.063;     %SPATIAL FREQUENCY
-samples = 420;
+k0=0.063;               %SPATIAL FREQUENCY  [cycle/pix]
+samples = 420;          %STIMULUS DIMENSION [pix]
 % samples = 47;
 % RELATIVE BANDWIDTH => B=0.0208;
 
-% % FILTER 21x21
-% filter_file = 'FILTERS/Gt21B0.0417f0.125.mat';
-% k0 = 0.125;
-% samples = 21;
-
+%PHASE SHIFT
 % ph_ = pi/4:-pi/4:-5/4*pi; %this choice is related to the offset value of phase_shift (pi/2)
 ph_ = pi/2;
 n_orient = 8;
 ph = repmat(ph_,n_orient,1);  %phase_shift values for each orientation channel 
-%d_pref = []; %11X11 GABOR
-%d_pref = []; %43X43 GABOR
 
-a=0; %OCULAR DOMINANCE
+%OCULAR DOMINANCE
+a = 1; 
+%TEMPORAL FILTER
 Ft_choice = 'gabor'; % 'gabor'; 'exp_decay'; 'adelson_bergen'
-% v = 0;   %Preferred velocity
+%PREFERRED VELOCITY
+% v = 0;   
 v  = linspace(-1,1,11)*2;
-% v=1;
 % kk = [-3 -1.5  0.5  1.5 3]; %Preferred velocity with Adelson_Bergen
 
 %NORMALIZATION VALUES
-% alpha = [0,0;1,1];    %my values -> for MID detectors identifies one pixel peak!
-alpha = [0,0;1,1];          %no normalization
+alpha = [1;0];          %no normalization
 
-%Organize the input parameters for the function
+%Organize the input parameters for the functions
 param.spatFreq    = k0;             %"k0";
 param.ocDom       = a;              %"a";
 param.phShift     = ph;             %"ph";
@@ -59,7 +52,7 @@ param.spatialFilt = filter_file;    %"filter_file";
 param.samples     = samples;        %"samples";
 param.normParam   = alpha;          %"normalization factor";
 
-%% monocular motion direction selectivity, population activity
+%% EXAMPLE: POP ACTIVITY ON SET OF MOVING RDS (WITH DIFFERENTS VEL VECTOR)
 
 %STIMULUS DEFINITION
 stim.type = 'RDS_tuning';
@@ -74,9 +67,8 @@ vy = vv.*sin(tt);
 stim.vgrat = [vx(:),vy(:)];
 stim.dur = 72; %duration in frame
 stim.mode = 1;
-stim.disp = 0;
+stim.disp = 0; %dispaly stimulus
 theta = [3/2*pi-pi/4,3/2*pi+pi/4];
-%     stim = init_stimulus();
 %SIMULATION
 [e,param] = motion_popV1MT(param,stim);
 th = 2e-2;
@@ -91,6 +83,7 @@ theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
 
 [xx,tt] = meshgrid(param.prefVel,theta_cell_OUT);
 
+load 'SIMULATIONS/BioGautama/GautamaWieghts88_Plaid.mat'
 %Explicit intersection of constraints method to compute weigths
 %     W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
 W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
@@ -98,12 +91,12 @@ W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
 %     W2 = exp(-abs(xx(:).*cos(tt(:)'-tt(:)) - xx(:)')/(0.25)).^2;
 W2 = W2 - eye(size(W2));
 
+%DESIRED POPULATION ACTIVITY
 [dx] = reshape(stim.vel_stim.*cos(stim.truetheta),8,11);
 [dy] = reshape(stim.vel_stim.*sin(stim.truetheta),8,11);
 
 sgmx = .5;
 sgmy = .5;
-
 G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
     (xx.*sin(tt)-dy).^2/(2*sgmy^2)));
 
@@ -166,7 +159,7 @@ title('POP RESP BIO GAUTAMA2')
 %     surf_motion_pop(enormtmp,param)
 %     %Display Data
 %     polarplot_motion_tun()
-end
+% end
 
 % %% BIOGAUTAMA TEST
 % if bio_gautama == 1
@@ -191,7 +184,6 @@ end
 
 %%  FUNCTIONS
 function stim = init_stimulus(varargin)
-     
     stim.type = 'grat';
 % %     TYPE II PLAID
     stim.theta_g = 0:pi/8:pi-pi/8; %true orientation

@@ -46,8 +46,7 @@ switch stim.type
             II{num_pld} = plaid(arg);
             %generate plaid stimulus
         end
-    case 'RDS_tuning'
-                
+    case 'RDS_tuning'         
         for num_stim = 1:length(stim.truetheta)
                 vx = stim.vgrat(num_stim,1);
                 vy = stim.vgrat(num_stim,2);
@@ -89,11 +88,11 @@ n_orient = param.nOrient;
 % [IIv,IIo] = size(II);
 % ph_shift = 0;
 % parameters{3,1} = ph_shift;
-        if (size(II,1)*size(II,2))>1
-            e=zeros(4,1,1,n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2));
-        else
-%             e=zeros(4,size(II{1},1),size(II{1},2),n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2));
-        end
+if (size(II,1)*size(II,2))>1
+    e = zeros(4,1,1,n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2));
+else
+%    e=zeros(4,size(II{1},1),size(II{1},2),n_orient,n_vel,size(param.phShift,2),size(II,1),size(II,2));
+end
 TUN = 0;
 % %ocular dominance is 0 or 1 'cause is monocular test
 param.ocDom = 1; %force this value
