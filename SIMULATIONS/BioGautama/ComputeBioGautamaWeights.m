@@ -1,8 +1,8 @@
-close all
-clear
-clc
+% close all
+% clear
+% clc
 
-load '..\SIMULATIONS\vel_tuning_plaid'
+% load 'vel_tuning_plaid'
 
 theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
 
@@ -74,9 +74,9 @@ supp_t = angle(exp(1i*tt(:)).*exp(-1i*tt(:)'));
 W2 = exp(-(supp_r - (1.1*xx(:)')).^2/(2*0.25^2)).*exp(-(supp_t).^2/(2*(pi/2)^2));
 % W2 = W2-W2.*eye(size(W2));
 
-tmp = load('..\SIMULATIONS\vel_tuning_polarRDS_dur72');
-W3 = squeeze(tmp.e(3,:,:,:,:));
-W3 = reshape(W3,sze(1)*sze(2),[])';
+% tmp = load('vel_tuning_polarRDS_dur72');
+% W3 = squeeze(tmp.e(3,:,:,:,:));
+% W3 = reshape(W3,sze(1)*sze(2),[])';
 % W3 = W3-W3.*eye(size(W3));
 
 % W2 = (0.5+0.5*cos(2*pi/4*(xx(:).*cos(tt(:)'-tt(:)) - xx(:)')))-0*eye(size(W));
@@ -102,42 +102,42 @@ ind = 400;
 % ind = 1:8;
 ind_phi = 1:size(CT,4);
 
-% % % % % % VISUALIZATION of data
-figure,
-% % % % % % Population response at certain plaid stimulus (selected with ind)
-plot_pop_response(CT(:,:,ind,ind_phi),dx(ind,ind_phi),dy(ind,ind_phi),param.prefVel)
-figure,
-% % % % % % Desired pop response profile
-plot_pop_response(G(:,:,ind,ind_phi),dx(ind,ind_phi),dy(ind,ind_phi),param.prefVel)
+% % % % % % % VISUALIZATION of data
 % figure,
-% % % % % % Pop Response of Higher Neural Level (Weighted with weights obtained with BioGautama on pop of plaids)
-% plot_pop_response(CT2(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
-figure,
-% % % % % % Pop Response of Higher Neural Level (Weighted with imposed weights profile)
-plot_pop_response(CT3(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
-figure,
-% % % % % % Pop Response of Higher Neural Level (Weighted with weights obtained with BioGautama on pop of RDS)
-plot_pop_response(CT4(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
-
-dx = xx.*cos(tt);
-dy = xx.*sin(tt);
-
-ind = 1:8;
-figure,
-%weights obtained with BioGautama on pop of plaids
-plot_pop_response(W(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
-figure,
-%weights imposed with a reasoning on intersection of constraints method
-plot_pop_response(W2(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
-figure,
-%weights BioGautama on pop of RDS
-plot_pop_response(W3(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
-
-%SAVE DATA (WEIGHTS FUNCTION)
-W = reshape(W,sze(1)*sze(2),sze(1)*sze(2));
-W2 = reshape(W2,sze(1)*sze(2),sze(1)*sze(2));
-W3 = reshape(W3,sze(1)*sze(2),sze(1)*sze(2));
-
-save("GautamaWieghts88_Plaid.mat",'W')
-save("TikhonovWieghts88.mat",'W2')
-save("GautamaWieghts88_RDS.mat",'W3')
+% % % % % % % Population response at certain plaid stimulus (selected with ind)
+% plot_pop_response(CT(:,:,ind,ind_phi),dx(ind,ind_phi),dy(ind,ind_phi),param.prefVel)
+% figure,
+% % % % % % % Desired pop response profile
+% plot_pop_response(G(:,:,ind,ind_phi),dx(ind,ind_phi),dy(ind,ind_phi),param.prefVel)
+% % figure,
+% % % % % % % Pop Response of Higher Neural Level (Weighted with weights obtained with BioGautama on pop of plaids)
+% % plot_pop_response(CT2(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
+% figure,
+% % % % % % % Pop Response of Higher Neural Level (Weighted with imposed weights profile)
+% plot_pop_response(CT3(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
+% figure,
+% % % % % % % Pop Response of Higher Neural Level (Weighted with weights obtained with BioGautama on pop of RDS)
+% plot_pop_response(CT4(:,:,ind,ind_phi),dx(ind,:),dy(ind,:),param.prefVel)
+% 
+% dx = xx.*cos(tt);
+% dy = xx.*sin(tt);
+% 
+% ind = 1:8;
+% figure,
+% %weights obtained with BioGautama on pop of plaids
+% plot_pop_response(W(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
+% figure,
+% %weights imposed with a reasoning on intersection of constraints method
+% plot_pop_response(W2(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
+% figure,
+% %weights BioGautama on pop of RDS
+% plot_pop_response(W3(:,:,ind,:),dx(ind,:),dy(ind,:),param.prefVel)
+% 
+% %SAVE DATA (WEIGHTS FUNCTION)
+% W = reshape(W,sze(1)*sze(2),sze(1)*sze(2));
+% W2 = reshape(W2,sze(1)*sze(2),sze(1)*sze(2));
+% W3 = reshape(W3,sze(1)*sze(2),sze(1)*sze(2));
+% 
+% save("GautamaWieghts88_Plaid.mat",'W')
+% save("TikhonovWieghts88.mat",'W2')
+% save("GautamaWieghts88_RDS.mat",'W3')

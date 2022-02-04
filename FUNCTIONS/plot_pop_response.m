@@ -20,11 +20,15 @@ for j=1:size(rx,2)
         axes('Position',[posx posy w h]);
         
         
-        surf_polar(response(:,:,i,j),0,90,0,s/(2*m)),colormap(jet(256))
-        
+        [Iout,x,y] = surf_polar(response(:,:,i,j),0,90,0,s/(2*m));
+        colormap(jet(256))
+        %hold on maximal value
+        hold on
+        [m,indx] = max(Iout);
+        [m,indy] = max(m);
+        scatter(y(indy),x(indx(indy)),101,'green','*')
         set(gca,'Color','none')   
         grid off
-
 %         xlim([-3 3]);
 %         ylim([-3 3]);
 %         if i~=2||j~=1

@@ -16,9 +16,9 @@ addpath FUNCTIONS
 % % RELATIVE BANDWIDTH => B=0.0833;
 
 %FILTER 43x43
-filter_file='FILTERS/Gt43B0.0208f0.063.mat';
+filter_file = 'FILTERS/Gt43B0.0208f0.063.mat';
 % filter_file='FILTERS/Gt47B0.0800f0.063.mat';
-k0=0.063;               %SPATIAL FREQUENCY  [cycle/pix]
+k0 = 0.063;             %SPATIAL FREQUENCY  [cycle/pix]
 samples = 420;          %STIMULUS DIMENSION [pix]
 % samples = 47;
 % RELATIVE BANDWIDTH => B=0.0208;
@@ -39,7 +39,7 @@ v  = linspace(-1,1,11)*2;
 % kk = [-3 -1.5  0.5  1.5 3]; %Preferred velocity with Adelson_Bergen
 
 %NORMALIZATION VALUES
-alpha = [1;0];          %no normalization
+alpha = [1;0];
 
 %Organize the input parameters for the functions
 param.spatFreq    = k0;             %"k0";
@@ -52,7 +52,61 @@ param.spatialFilt = filter_file;    %"filter_file";
 param.samples     = samples;        %"samples";
 param.normParam   = alpha;          %"normalization factor";
 
+%% POP RESPONSE TO TYPE II PLAID
+stim = init_stimulus(0,[-3*pi/8 -pi/8],param.prefVel(1),[0.4,0.6]);
+stim.mode = 1;
+stim.disp = 0;
+
+%SIMULATION
+[e,param] = motion_popV1MT(param,stim);
+th = 2e-2;
+
+%DISPLAY RESULTS
+theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
+
+[xx,tt] = meshgrid(param.prefVel,theta_cell_OUT);
+
+load 'SIMULATIONS/BioGautama/GautamaWieghts88_Plaid.mat'
+%Explicit intersection of constraints method to compute weigths
+%     W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
+W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
+%     W2 = (0.5+0.5*cos(2*pi/4*(xx(:).*cos(tt(:)'-tt(:)) - xx(:)')));
+%     W2 = exp(-abs(xx(:).*cos(tt(:)'-tt(:)) - xx(:)')/(0.25)).^2;
+% W2 = W2 - eye(size(W2));
+
+% %DESIRED POPULATION ACTIVITY
+% [dx] = reshape(stim.vel_stim.*cos(stim.truetheta),8,11);
+% [dy] = reshape(stim.vel_stim.*sin(stim.truetheta),8,11);
+% 
+% sgmx = .5;
+% sgmy = .5;
+% G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
+%     (xx.*sin(tt)-dy).^2/(2*sgmy^2)));
+
+pop_resp = squeeze(e(3,33,33,:,:));
+sze = size(pop_resp);
+%     %NORMALIZATION
+% pop_resp = pop_resp./max(pop_resp,[],4);
+pop_resp_BioGautama = reshape(W*reshape(pop_resp,sze(1)*sze(2),[]),sze);
+pop_resp_BioGautama2 = reshape((W2*reshape(pop_resp,sze(1)*sze(2),[])),sze);
+% pop_resp_BioGautama = squeeze(mean(mean(pop_resp_BioGautama(61:end-60,61:end-60,:,:),1),2));
+% pop_resp_BioGautama2 = squeeze(mean(mean(pop_resp_BioGautama2(:,:,:,:),1),2));
+% pop_resp = squeeze(mean(mean(pop_resp(:,:,:,:),1),2));
+%POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
+figure,plot_pop_response(pop_resp,0,0,param.prefVel)
+title('POP RESPONSE')
+figure,plot_pop_response(pop_resp_BioGautama,0,0,param.prefVel)
+title('POP RESP BIO GAUTAMA')
+figure,plot_pop_response(pop_resp_BioGautama2,0,0,param.prefVel)
+title('POP RESP BIO GAUTAMA2')
+
+% str = input('stop?[Y/n]','s');
+% if strcmp(str,'Y')||strcmp(str,'y')
+%     error('script stopped')
+% else
+% end
 %% EXAMPLE: POP ACTIVITY ON SET OF MOVING RDS (WITH DIFFERENTS VEL VECTOR)
+%THIS SIMULATION CAN BE USED TO COMPUTE BIOGAUTAMA WEIGHTS
 
 %STIMULUS DEFINITION
 stim.type = 'RDS_tuning';
@@ -78,7 +132,8 @@ OldFolder = cd;
 cd(path);
 save('myvel_tuning_polarRDS_dur72','e','param','stim','-v7.3')
 cd(OldFolder)
-%BIOGAUTAMA COMPUTING FOR MT PATTERN RESPONSE
+
+%DISPLAY RESULTS
 theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
 
 [xx,tt] = meshgrid(param.prefVel,theta_cell_OUT);
@@ -103,12 +158,12 @@ G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
 pop_resp = squeeze(e(3,:,:,:,:));
 sze = size(pop_resp);
 %     %NORMALIZATION
-%     pop_resp = pop_resp./max(pop_resp,[],4);
+% pop_resp = pop_resp./max(pop_resp,[],4);
 pop_resp_BioGautama = reshape(reshape(pop_resp,sze(1)*sze(2),[])*W,sze);
 pop_resp_BioGautama2 = reshape((reshape(pop_resp,sze(1)*sze(2),[])*W2'),sze);
-%     pop_resp_BioGautama = squeeze(mean(mean(pop_resp_BioGautama(61:end-60,61:end-60,:,:),1),2));
-%     pop_resp_BioGautama2 = squeeze(mean(mean(pop_resp_BioGautama2(:,:,:,:),1),2));
-%     pop_resp = squeeze(mean(mean(pop_resp(:,:,:,:),1),2));
+% pop_resp_BioGautama = squeeze(mean(mean(pop_resp_BioGautama(61:end-60,61:end-60,:,:),1),2));
+% pop_resp_BioGautama2 = squeeze(mean(mean(pop_resp_BioGautama2(:,:,:,:),1),2));
+% pop_resp = squeeze(mean(mean(pop_resp(:,:,:,:),1),2));
 %POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
 figure,plot_pop_response(pop_resp,0,0,param.prefVel)
 title('POP RESPONSE')
@@ -116,7 +171,7 @@ figure,plot_pop_response(pop_resp_BioGautama,0,0,param.prefVel)
 title('POP RESP BIO GAUTAMA')
 figure,plot_pop_response(pop_resp_BioGautama2,0,0,param.prefVel)
 title('POP RESP BIO GAUTAMA2')
-%     figure,plot_pop_response(pop_resp_BioGautama2-pop_resp,0,0,param.prefVel)
+% figure,plot_pop_response(pop_resp_BioGautama2-pop_resp,0,0,param.prefVel)
 figure,plot_pop_response(G,0,0,param.prefVel)
 %POP RESPONSE TO MOVING RDS (HORIZONTALLY AT 2 pix/frame)
 figure,plot_pop_response(pop_resp,vx,vy,param.prefVel)
@@ -127,6 +182,43 @@ figure,plot_pop_response(pop_resp_BioGautama2,vx,vy,param.prefVel)
 title('POP RESP BIO GAUTAMA2')
 %     figure,plot_pop_response(pop_resp_BioGautama2-pop_resp,vx,vy,param.prefVel)
 
+%% EXAMPLE: POP ACTIVITY ON SET OF TYPE II PLAID (WITH DIFFERENTS VEL VECTOR; ALL COMBINATIONS)
+%THIS SIMULATION CAN BE USED TO COMPUTE BIOGAUTAMA WEIGHTS
+
+%STIMULUS DEFINITION
+% trueteta = 0:pi/param.nOrient:pi-pi/param.nOrient;
+truetheta = 0;
+plaid_vel = param.prefVel([1 3]);
+[theta1,theta2] = meshgrid([linspace(-3*pi/8,3*pi/8,7)]);
+theta_g = [theta1(:),theta2(:)];
+theta_g(1:8:end,:) = [];
+%combinations of contrast's gratings
+[X, X2] = meshgrid(0:0.2:0.5,1:-0.2:0.5);
+stim = init_stimulus(truetheta(:),theta_g,plaid_vel,[X(:),X2(:)]);
+% stim.contrast_g = [0.5,0.5];
+
+
+% stim = init_stimulus(pi/4,[-3*pi/8 -pi/8],.8);
+stim.dur = 47; %duration in frame
+stim.mode = 1;
+stim.disp = 0; %set to 1 to show visual stimulus in a figure
+%%
+%SIMULATION
+lambda = [0,1e-3,1e-1,1,1e2,1e3];
+for i=2:numel(lambda)
+    param.normParam = [1;lambda(i)];
+    [e,param] = motion_popV1MT(param,stim);
+    th = 2e-2;
+    %SAVE DATA
+    path = 'SIMULATIONS';
+    OldFolder = cd;
+    cd(path);
+    filename = ['vel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
+    save(filename,'e','param','stim','-v7.3')
+    cd(OldFolder)
+end
+
+%% 
 %SELECT data
 %     etmp = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,:,1,1));
 %THRESHOLDING
@@ -183,12 +275,41 @@ title('POP RESP BIO GAUTAMA2')
 % end
 
 %%  FUNCTIONS
-function stim = init_stimulus(varargin)
-    stim.type = 'grat';
-% %     TYPE II PLAID
-    stim.theta_g = 0:pi/8:pi-pi/8; %true orientation
-    stim.vgrat = linspace(-1,1,11)*2;
-
-    stim.dur = 27; %duration in frame
+function stim = init_stimulus(truetheta,theta,vpld,C)
+    stim.type = 'plaid';
+    % TYPE II PLAID
+%     stim.theta_g = [3/2*pi-pi/6,3/2*pi-pi/3]; %true orientation
+%     % stim.theta_g = 0;
+%     stim.truetheta =  3/2*pi; %true orientation
+    % TYPE I PLAID
+    % stim.theta_g = 0;
+    stim.truetheta =  truetheta(:); %true orientation
+    stim.theta_g = [theta]; %true orientation
+    stim.vel_stim = [vpld(:)];
+%     [x, y, z] = meshgrid(stim.truetheta, stim.theta_g(:,1), stim.vel_stim);
+    [x, y, z, c1] = ndgrid(stim.truetheta, stim.theta_g(:,1), stim.vel_stim, C(:,1)); 
+    y = pagetranspose(y);   %pagetranspose serve per rendere le grid create con ndgrid nello stesso ordine dei meshgrid
+    c1 = pagetranspose(c1);
+%     [stim.truetheta, y2, stim.vel_stim] = meshgrid(stim.truetheta, stim.theta_g(:,2), stim.vel_stim);
+    [stim.truetheta, y2, stim.vel_stim,c2] = ndgrid(stim.truetheta, stim.theta_g(:,2), stim.vel_stim, C(:,2));
+    stim.truetheta = pagetranspose(stim.truetheta);
+    y2 = pagetranspose(y2);
+    stim.vel_stim = pagetranspose(stim.vel_stim);
+    c2 = pagetranspose(c2);
+    stim.truetheta = stim.truetheta(:); 
+    stim.theta_g = stim.truetheta + [y(:) y2(:)];
+    stim.contrast_g = [c1(:),c2(:)];
+    stim.vel_stim = stim.vel_stim(:);
+    % stim.vgrat = [2,1];
+    if size(stim.theta_g,2)==2
+        stim.ori = [cos(stim.theta_g(:,1)-stim.truetheta), cos(stim.theta_g(:,2)-stim.truetheta)];
+        stim.vgrat = [stim.ori(:,1).*stim.vel_stim, stim.ori(:,2).*stim.vel_stim];
+        stim.vgrat = round(stim.vgrat,5,"decimals");
+    else
+        stim.vgrat = stim.vel_stim;
+    end
+    % stim.vgrat = 0;
+    stim.dur = 43; %duration in frame
+    stim.mode = 1;
     stim.disp = 0; %set to 1 to show visual stimulus in a figure
 end

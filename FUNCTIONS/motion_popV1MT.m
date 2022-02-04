@@ -10,8 +10,9 @@ if ~isfield(stim,'type')
     error('Define type of the stimulus!! Options are: grat, plaid, or RDS')
 end
 fieldNames{1} = 'dur'; 
-% fieldNames{2} = 'truetheta'; fieldNames{3} = 'vpld';
 fieldNames{2} = 'vgrat'; fieldNames{3} = 'theta_g';
+% fieldNames{4} = 'truetheta'; fieldNames{5} = 'contrast_g';
+% fieldNames{6} = 'mode'; fieldNames{7} = 'vel_stim';
 argCheck(stim,fieldNames);
 %% Stimulus definition 
 stimuli = ["plaid","grat","RDS_tuning","RDS_moving","shift_grat"];
@@ -39,7 +40,7 @@ switch stim.type
             arg.vgrat = stim.vgrat(num_pld,:);          %gratings vel       [pixs/frame]
             arg.theta_g = stim.theta_g(num_pld,:);      %gratings orient    [rad]
             arg.alpha = 0.5;                            %alpha channel for transparency
-            arg.contrast = [0.5,0.5];                   %Contrast of two gratings
+            arg.contrast = stim.contrast_g(num_pld,:);             %Contrast of two gratings
             arg.mode = stim.mode;                       %stimulus implementation algorithm
             arg.pl_type = pl_type;                      %plaid type
             %define plaid object
@@ -74,7 +75,6 @@ if stim.disp == 1
             tmp = generate_plaid(tmp);
         end
         for i=1:dur
-            
             imagesc(squeeze(tmp(:,:,i)))
             drawnow
             pause(0.1)

@@ -149,16 +149,28 @@ else
     a1 = 1; a2 = 0;
 end
 % S = zeros(sy*sx*n_frames*phase_num,1);
-
+g = fspecial('gaussian',7);
+sze = size(C1{1});
 for i = 1:4
-    C1{i} = reshape(C1{i},sx*sy*n_frames,n_orient,v,phase_num);
-    C1{i} = permute(C1{i},[1,4,2,3]);
-    C1{i} = reshape(C1{i},sx*sy*n_frames*phase_num,n_orient,v);
-    S = sum(C1{i},[2 3]);
-    C1{i} = C1{i}./(a1 + a2*S/(n_orient*v));
+%     C1{i} = reshape(C1{i},sy,sx,n_frames,n_orient,v,phase_num);
+%     C1{i} = permute(C1{i},[1,2,4,5,3,6]);
+    C1{i} = reshape(C1{i},sy*sx*n_frames,n_orient,v*phase_num);
+    S = squeeze(mean(mean(C1{i})));
+    C1{i} = reshape(C1{i},sy*sx*n_frames*n_orient,v*phase_num);
+    S = repmat(S',[size(C1{i},1) 1]);
+%     for j=1:n_frames*n_orient*v*phase_num
+%         tmp = C1{i}(:,:,j);
+%         tmp = conv2b(tmp,g,3);
+%         S = tmp;
+%     end
+%     C1{i} = permute(C1{i},[1,4,2,3]);
+%     C1{i} = reshape(C1{i},sx*sy*n_frames*phase_num,n_orient,v);
+%     S = sum(C1{i},[2 3]);
+    C1{i} = C1{i}./(a1 + a2*S);
     C1{i}(isnan(C1{i})) = 0;
-    C1{i} = reshape(C1{i},sy*sx*n_frames,phase_num,n_orient,v);
-    C1{i} = permute(C1{i},[1,3,4,2]);
+    C1{i} = reshape(C1{i},sze);
+%     C1{i} = reshape(C1{i},sy*sx*n_frames,phase_num,n_orient,v);
+%     C1{i} = permute(C1{i},[1,3,4,2]);
 end
 % for i=1:4
 %     tmp = C1{i};

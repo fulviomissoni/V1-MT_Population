@@ -51,7 +51,7 @@ end
 for index=1:n_vel
     if(filtertype==1) %Gabor
         %center the response of the Gabor filter in 0 to make it causal
-        t2 = -floor(n_frames/2):floor(n_frames/2)-1;
+        t2 = -floor(n_frames/2):floor(n_frames/2);
         vc=v(index);
         f0t=vc*k0;
         %relative bandwith extension

@@ -1,4 +1,4 @@
-function surf_polar(I,az,el,normal,disp)
+function [Iout,x,y] = surf_polar(I,az,el,normal,disp)
 
 if nargin<2
     az=30;
@@ -23,8 +23,11 @@ thetaout = thetaout + (thetaout<0)*pi;
 thetaout(isnan(thetaout)) = 0;
 rhoout = Xout.*cos(thetaout) + Yout.*sin(thetaout);
 Iout = interp2(rho,theta,[I; fliplr(I(1,:))],rhoout,thetaout);
-imagesc(linspace(min(disp),max(disp),101),linspace(min(disp),max(disp),101),Iout)
+y = linspace(min(disp),max(disp),101);
+x = linspace(min(disp),max(disp),101);
+imagesc(y,x,Iout)
 axis xy
+
 % fvc=surf2patch(X,Y,-1+zeros(size(X)),[I; fliplr(I(1,:))]);
 % 
 % patch(fvc);
