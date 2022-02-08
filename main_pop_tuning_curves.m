@@ -27,7 +27,7 @@ samples = 420;          %STIMULUS DIMENSION [pix]
 % ph_ = pi/4:-pi/4:-5/4*pi; %this choice is related to the offset value of phase_shift (pi/2)
 ph_ = pi/2;
 n_orient = 8;
-ph = repmat(ph_,n_orient,1);  %phase_shift values for each orientation channel 
+ph = repmat(ph_,n_orient,1);  %phase_shift value for each orientation channel 
 
 %OCULAR DOMINANCE
 a = 1; 
@@ -188,13 +188,13 @@ title('POP RESP BIO GAUTAMA2')
 %STIMULUS DEFINITION
 % trueteta = 0:pi/param.nOrient:pi-pi/param.nOrient;
 truetheta = 0;
-plaid_vel = param.prefVel([1 3]);
+plaid_vel = param.prefVel([1 4]);
 [theta1,theta2] = meshgrid([linspace(-3*pi/8,3*pi/8,7)]);
 theta_g = [theta1(:),theta2(:)];
 theta_g(1:8:end,:) = [];
-%combinations of contrast's gratings
-[X, X2] = meshgrid(0:0.2:0.5,1:-0.2:0.5);
-stim = init_stimulus(truetheta(:),theta_g,plaid_vel,[X(:),X2(:)]);
+%differences in contrast sensitivity
+diff_contrast = [0:0.1:1];
+stim = init_stimulus(truetheta(:),theta_g,plaid_vel,diff_contrast);
 % stim.contrast_g = [0.5,0.5];
 
 
@@ -204,8 +204,8 @@ stim.mode = 1;
 stim.disp = 0; %set to 1 to show visual stimulus in a figure
 %%
 %SIMULATION
-lambda = [0,1e-3,1e-1,1,1e2,1e3];
-for i=2:numel(lambda)
+lambda = [1e-1,1,1e1,1e2];
+for i = 1:numel(lambda)
     param.normParam = [1;lambda(i)];
     [e,param] = motion_popV1MT(param,stim);
     th = 2e-2;
@@ -275,7 +275,7 @@ end
 % end
 
 %%  FUNCTIONS
-function stim = init_stimulus(truetheta,theta,vpld,C)
+function stim = init_stimulus(truetheta,theta,vpld,diff_contrast)
     stim.type = 'plaid';
     % TYPE II PLAID
 %     stim.theta_g = [3/2*pi-pi/6,3/2*pi-pi/3]; %true orientation
@@ -287,11 +287,11 @@ function stim = init_stimulus(truetheta,theta,vpld,C)
     stim.theta_g = [theta]; %true orientation
     stim.vel_stim = [vpld(:)];
 %     [x, y, z] = meshgrid(stim.truetheta, stim.theta_g(:,1), stim.vel_stim);
-    [x, y, z, c1] = ndgrid(stim.truetheta, stim.theta_g(:,1), stim.vel_stim, C(:,1)); 
+    [x, y, z, c1] = ndgrid(stim.truetheta, stim.theta_g(:,1), stim.vel_stim, 0.5-diff_contrast/2); 
     y = pagetranspose(y);   %pagetranspose serve per rendere le grid create con ndgrid nello stesso ordine dei meshgrid
     c1 = pagetranspose(c1);
 %     [stim.truetheta, y2, stim.vel_stim] = meshgrid(stim.truetheta, stim.theta_g(:,2), stim.vel_stim);
-    [stim.truetheta, y2, stim.vel_stim,c2] = ndgrid(stim.truetheta, stim.theta_g(:,2), stim.vel_stim, C(:,2));
+    [stim.truetheta, y2, stim.vel_stim,c2] = ndgrid(stim.truetheta, stim.theta_g(:,2), stim.vel_stim, 0.5+diff_contrast/2);
     stim.truetheta = pagetranspose(stim.truetheta);
     y2 = pagetranspose(y2);
     stim.vel_stim = pagetranspose(stim.vel_stim);

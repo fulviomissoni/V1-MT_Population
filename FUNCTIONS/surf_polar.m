@@ -1,4 +1,4 @@
-function [Iout,x,y] = surf_polar(I,az,el,normal,disp)
+function varargout = surf_polar(I,az,el,normal,disp)
 
 if nargin<2
     az=30;
@@ -17,7 +17,7 @@ end
 
 X=rho.*cos(theta); Y=rho.*sin(theta);
 [Xout Yout]=meshgrid(linspace(min(disp),max(disp),101));
-[thetaout rhoout] = cart2pol(Xout,Yout);
+% [thetaout rhoout] = cart2pol(Xout,Yout);
 thetaout = atan(Yout./Xout);
 thetaout = thetaout + (thetaout<0)*pi;
 thetaout(isnan(thetaout)) = 0;
@@ -43,5 +43,5 @@ plot(X,Y,'k--')
 view(az,el);
 
 flag=0;
-
+varargout{1} = Iout; varargout{2} = x; varargout{3} = y;
 end

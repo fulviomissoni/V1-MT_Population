@@ -26,7 +26,7 @@ for j=1:size(rx,2)
         hold on
         [m,indx] = max(Iout);
         [m,indy] = max(m);
-        scatter(y(indy),x(indx(indy)),101,'green','*')
+        scatter(y(indy),x(indx(indy)),150,'green','*')
         set(gca,'Color','none')   
         grid off
 %         xlim([-3 3]);
