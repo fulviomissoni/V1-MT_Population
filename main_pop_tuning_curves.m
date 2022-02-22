@@ -186,14 +186,14 @@ title('POP RESP BIO GAUTAMA2')
 %THIS SIMULATION CAN BE USED TO COMPUTE BIOGAUTAMA WEIGHTS
 
 %STIMULUS DEFINITION
-% trueteta = 0:pi/param.nOrient:pi-pi/param.nOrient;
-truetheta = 0;
-plaid_vel = param.prefVel([1 4]);
+truetheta = 0:pi/param.nOrient:pi-pi/param.nOrient;
+% truetheta = 0;
+plaid_vel = param.prefVel;
 [theta1,theta2] = meshgrid([linspace(-3*pi/8,3*pi/8,7)]);
 theta_g = [theta1(:),theta2(:)];
 theta_g(1:8:end,:) = [];
 %differences in contrast sensitivity
-diff_contrast = [0:0.1:1];
+diff_contrast = [0];
 stim = init_stimulus(truetheta(:),theta_g,plaid_vel,diff_contrast);
 % stim.contrast_g = [0.5,0.5];
 
@@ -204,7 +204,8 @@ stim.mode = 1;
 stim.disp = 0; %set to 1 to show visual stimulus in a figure
 %%
 %SIMULATION
-lambda = [1e-1,1,1e1,1e2];
+lambda = 0;
+% lambda = [1e-1,1,1e1,1e2];
 for i = 1:numel(lambda)
     param.normParam = [1;lambda(i)];
     [e,param] = motion_popV1MT(param,stim);
@@ -213,7 +214,8 @@ for i = 1:numel(lambda)
     path = 'SIMULATIONS';
     OldFolder = cd;
     cd(path);
-    filename = ['vel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
+%     filename = ['vel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
+    filename = ['vel_tuning_All_PlaidII_lambda',num2str(lambda(i))];
     save(filename,'e','param','stim','-v7.3')
     cd(OldFolder)
 end

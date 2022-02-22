@@ -10,7 +10,7 @@ ro(isnan(ro)) = 0;
 for j=1:size(rx,2)
     for i = 1:size(rx,1)
        w = .5/size(rx,2);
-       h = .5/size(rx,1) ;
+       h = .5/size(rx,1);
         
        posx = (1-w)*ro(i,j)*cos(theta(i,j))+0.5 - w/2;
        posy = (1-h)*ro(i,j)*sin(theta(i,j))+0.5 - h/2;
@@ -24,6 +24,9 @@ for j=1:size(rx,2)
         colormap(jet(256))
         %hold on maximal value
         hold on
+        [Xout, Yout] = meshgrid(x);
+        % [thetaout rhoout] = cart2pol(Xout,Yout);
+        thetaout = atan(Yout./Xout);
         [m,indx] = max(Iout);
         [m,indy] = max(m);
         scatter(y(indy),x(indx(indy)),150,'green','*')
