@@ -66,7 +66,7 @@ theta_cell_OUT = 0:pi/param.nOrient:pi-pi/param.nOrient;
 
 [xx,tt] = meshgrid(param.prefVel,theta_cell_OUT);
 
-load 'SIMULATIONS/BioGautama/GautamaWieghts88_Plaid.mat'
+load 'SIMULATIONS/GautamaWeights88_Plaid.mat'
 %Explicit intersection of constraints method to compute weigths
 %     W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
 W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
@@ -83,7 +83,7 @@ W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
 % G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
 %     (xx.*sin(tt)-dy).^2/(2*sgmy^2)));
 
-pop_resp = squeeze(e(3,33,33,:,:));
+pop_resp = squeeze(e(3,:,:,1));
 sze = size(pop_resp);
 %     %NORMALIZATION
 % pop_resp = pop_resp./max(pop_resp,[],4);
@@ -186,14 +186,14 @@ title('POP RESP BIO GAUTAMA2')
 %THIS SIMULATION CAN BE USED TO COMPUTE BIOGAUTAMA WEIGHTS
 
 %STIMULUS DEFINITION
-truetheta = 0:pi/param.nOrient:pi-pi/param.nOrient;
-% truetheta = 0;
-plaid_vel = param.prefVel;
-[theta1,theta2] = meshgrid([linspace(-3*pi/8,3*pi/8,7)]);
+% truetheta = 0:pi/param.nOrient:pi-pi/param.nOrient;
+truetheta = 0;
+plaid_vel = param.prefVel(1:5);
+[theta1,theta2] = meshgrid(linspace(-3*pi/8,3*pi/8,7));
 theta_g = [theta1(:),theta2(:)];
 theta_g(1:8:end,:) = [];
 %differences in contrast sensitivity
-diff_contrast = [0];
+diff_contrast = 0.15;
 stim = init_stimulus(truetheta(:),theta_g,plaid_vel,diff_contrast);
 % stim.contrast_g = [0.5,0.5];
 
@@ -204,8 +204,8 @@ stim.mode = 1;
 stim.disp = 0; %set to 1 to show visual stimulus in a figure
 %%
 %SIMULATION
-lambda = 0;
-% lambda = [1e-1,1,1e1,1e2];
+lambda = [0,1e-2];
+% lambda = [0,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1,1e1,1e2];
 for i = 1:numel(lambda)
     param.normParam = [1;lambda(i)];
     [e,param] = motion_popV1MT(param,stim);
@@ -214,8 +214,8 @@ for i = 1:numel(lambda)
     path = 'SIMULATIONS';
     OldFolder = cd;
     cd(path);
-%     filename = ['vel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
-    filename = ['vel_tuning_All_PlaidII_lambda',num2str(lambda(i))];
+    filename = ['vel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
+%     filename = ['vel_tuning_All_PlaidII_lambda',num2str(lambda(i))];
     save(filename,'e','param','stim','-v7.3')
     cd(OldFolder)
 end
