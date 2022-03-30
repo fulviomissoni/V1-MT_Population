@@ -39,7 +39,7 @@ v  = linspace(-1,1,11)*2;
 % kk = [-3 -1.5  0.5  1.5 3]; %Preferred velocity with Adelson_Bergen
 
 %NORMALIZATION VALUES
-alpha = [1;0];
+alpha = [1;1e-4];
 
 %Organize the input parameters for the functions
 param.spatFreq    = k0;             %"k0";
@@ -53,7 +53,7 @@ param.samples     = samples;        %"samples";
 param.normParam   = alpha;          %"normalization factor";
 
 %% POP RESPONSE TO TYPE II PLAID
-stim = init_stimulus(0,[-3*pi/8 -pi/8],param.prefVel(1),[0.4,0.6]);
+stim = init_stimulus(0,[3*pi/8 -3*pi/8],param.prefVel(end),0.4);
 stim.mode = 1;
 stim.disp = 0;
 
@@ -83,7 +83,7 @@ W2 = exp(-(xx(:).*cos(tt(:)'-tt(:)) - xx(:)').^2/(2*0.25^2));
 % G = exp(-((xx.*cos(tt)-dx).^2/(2*sgmx^2)+...
 %     (xx.*sin(tt)-dy).^2/(2*sgmy^2)));
 
-pop_resp = squeeze(e(3,:,:,1));
+pop_resp = squeeze(e(3,66/2,66/2,:,:));
 sze = size(pop_resp);
 %     %NORMALIZATION
 % pop_resp = pop_resp./max(pop_resp,[],4);
@@ -193,7 +193,7 @@ plaid_vel = param.prefVel(1:5);
 theta_g = [theta1(:),theta2(:)];
 theta_g(1:8:end,:) = [];
 %differences in contrast sensitivity
-diff_contrast = 0.15;
+diff_contrast = 0:0.2:0.6;
 stim = init_stimulus(truetheta(:),theta_g,plaid_vel,diff_contrast);
 % stim.contrast_g = [0.5,0.5];
 
@@ -204,8 +204,8 @@ stim.mode = 1;
 stim.disp = 0; %set to 1 to show visual stimulus in a figure
 %%
 %SIMULATION
-lambda = [0,1e-2];
-% lambda = [0,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1,1e1,1e2];
+% lambda = [0,1e-2];
+lambda = [0,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1,1e1,1e2];
 for i = 1:numel(lambda)
     param.normParam = [1;lambda(i)];
     [e,param] = motion_popV1MT(param,stim);
@@ -214,13 +214,13 @@ for i = 1:numel(lambda)
     path = 'SIMULATIONS';
     OldFolder = cd;
     cd(path);
-    filename = ['vel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
+    filename = ['newVel_tuning_PlaidII_lambda',num2str(lambda(i)),'_difContrasts'];
 %     filename = ['vel_tuning_All_PlaidII_lambda',num2str(lambda(i))];
     save(filename,'e','param','stim','-v7.3')
     cd(OldFolder)
 end
 
-%% 
+ %% 
 %SELECT data
 %     etmp = squeeze(e(:,ceil(samples/2),ceil(samples/2),:,:,:,1,1));
 %THRESHOLDING

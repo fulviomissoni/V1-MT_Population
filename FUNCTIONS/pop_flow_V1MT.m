@@ -148,63 +148,38 @@ if nargin>2
 else
     a1 = 1; a2 = 0;
 end
-% S = zeros(sy*sx*n_frames*phase_num,1);
-g = fspecial('gaussian',7);
+
 sze = size(C1{1});
 for i = 1:4
-%     C1{i} = reshape(C1{i},sy,sx,n_frames,n_orient,v,phase_num);
-%     C1{i} = permute(C1{i},[1,2,4,5,3,6]);
     C1{i} = reshape(C1{i},sy,sx,n_frames*n_orient*v*phase_num);
     S = zeros(sy,sx,n_frames*n_orient*v*phase_num);
 %     S = squeeze(mean(mean(C1{i})));
-    sigmaPool = 1;
+    sigmaPool = 3;
+    %spatial pooling of normalization pool
     for p = 1:n_frames*n_orient*v*phase_num
         tmp = C1{i}(:,:,p);
         tmp2 = imgaussfilt(tmp,sigmaPool);
         S(:,:,p) = tmp2;
     end
     C1{i} = reshape(C1{i},sy*sx*n_frames*n_orient,v*phase_num);
-%     S = repmat(S',[size(C1{i},1) 1]);
-    S = reshape(S,sy*sx*n_frames*n_orient,v*phase_num);
-%     for j=1:n_frames*n_orient*v*phase_num
-%         tmp = C1{i}(:,:,j);
-%         tmp = conv2b(tmp,g,3);
-%         S = tmp;
-%     end
-%     C1{i} = permute(C1{i},[1,4,2,3]);
-%     C1{i} = reshape(C1{i},sx*sy*n_frames*phase_num,n_orient,v);
-%     S = sum(C1{i},[2 3]);
+    S = reshape(S,sy*sx*n_frames,n_orient,v*phase_num);
+    S = permute(S,[2 1 3]);
+    S = reshape(S,n_orient,[]);
+    index_o = circshift(1:n_orient,3);
+    %orientation pooling
+    for o = 1:n_orient
+        tmp = S(index_o(1:5),:);
+        S(o,:) = sum(tmp);
+        index_o = circshift(index_o,-1);
+    end
+    S = reshape(S,n_orient,sy*sx*n_frames,v*phase_num);
+    S = permute(S,[2 1 3]);
+    S = reshape(C1{i},sy*sx*n_frames*n_orient,v*phase_num);
     C1{i} = C1{i}./(a1 + a2*S);
     C1{i}(isnan(C1{i})) = 0;
-    C1{i} = reshape(C1{i},sze);
-%     C1{i} = reshape(C1{i},sy*sx*n_frames,phase_num,n_orient,v);
-%     C1{i} = permute(C1{i},[1,3,4,2]);
+%     C1{i} = reshape(C1{i},sze);
 end
-% for i=1:4
-%     tmp = C1{i};
-%     tmp = tmp./(sigma + S/(n_orient*v));
-%     tmp(isnan(tmp)) = 0;
-%     C1{i} = tmp;
-% end
-%%%%%%%
 
-% %cumsum
-% S = zeros(sy*sx*n_frames*n_orient*v,phase_num);
-% for i=1:4
-%     S = S + C1{i};
-% end
-% S = S/4;
-% for i = 1:4
-%     %for each C1 cell (i-index)
-%     tmp = C1{i};
-%     for j=1:phase_num
-%         %for each disparity channel (j-index)
-% %         tmp(:,j) = tmp(:,j)./(a1*S(:,j) + a2);
-%         tmp(:,j) = tmp(:,j)./(a1*tmp(:,j) + a2);
-%     end
-%     tmp(isnan(tmp)) = 0;
-%     C1{i} = tmp;
-% end
 %connection weights
 % copp = 0.6;
 copp = 1;
